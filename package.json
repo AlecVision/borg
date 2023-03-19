@@ -14,7 +14,7 @@
     "test": "vitest run --coverage",
     "build": "tsup",
     "lint": "npx tsc",
-    "postinstall": "npm install --no-package-lock esbuild@0.17.5",
+    "postinstall": "npm install --no-package-lock --save-exact esbuild@0.17.5",
     "ci": "npm ci && npm run lint && npm run test && npm run build",
     "stage": "npm run build && npm publish --access=restricted --tag=next",
     "release": "npm run build && changeset publish"
@@ -45,7 +45,7 @@
     "@changesets/cli": "^2.26.0",
     "@vitest/coverage-c8": "^0.29.2",
     "@vitest/ui": "^0.29.2",
-    "esbuild": "^0.17.5",
+    "esbuild": "0.17.5",
     "prettier": "^2.8.4",
     "ts-node": "^10.9.1",
     "tsup": "^6.6.3",
