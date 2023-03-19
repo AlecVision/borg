@@ -18,7 +18,7 @@ jobs:
         with:
           node-version: 16.x
           cache: "npm"
-      - run: npm ci
+      - run: npm run ci
       - name: Publish to NPM
         id: changesets
         uses: changesets/action@v1
@@ -40,7 +40,7 @@ jobs:
             node-version: 16.x
             cache: "npm"                  
             registry-url: https://npm.pkg.github.com/
-        - run: npm ci
-        - run: npm publish
+        - name: Publish to GPR
+          run: npm run ci && npm publish
           env:
               NODE_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
