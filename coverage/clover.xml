@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<coverage generated="1679213208393" clover="3.2.0">
-  <project timestamp="1679213208393" name="All files">
+<coverage generated="1679214695120" clover="3.2.0">
+  <project timestamp="1679214695121" name="All files">
     <metrics statements="2733" coveredstatements="2032" conditionals="139" coveredconditionals="104" methods="135" coveredmethods="47" elements="3007" coveredelements="2183" complexity="0" loc="2733" ncloc="2733" packages="1" files="2" classes="2"/>
     <file name="index.ts" path="/Users/alec/dev/borg/src/index.ts">
       <metrics statements="2148" coveredstatements="1447" conditionals="138" coveredconditionals="103" methods="135" coveredmethods="47"/>

@@ -14,7 +14,7 @@
     "test": "vitest run --coverage",
     "build": "tsup",
     "lint": "npx tsc",
-    "postinstall": "npm install --no-package-lock --save-exact esbuild@0.17.5",
+    "postinstall": "npm install --save-exact --save-dev esbuild@0.17.5",
     "ci": "npm ci && npm run lint && npm run test && npm run build",
     "stage": "npm run build && npm publish --access=restricted --tag=next",
     "release": "npm run build && changeset publish"
