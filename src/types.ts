@@ -577,7 +577,7 @@ export type BuildStringBsonSchemaLiteral<
       pattern: TRegex;
     }
   : never;
-//@ts-expect-error - vitest handles import.meta
+//@ts-expect-error - vitest handles import.meta 
 if (import.meta.vitest) {
   // @ts-expect-error - vitest handles the top level await
   const { it } = await import("vitest");
