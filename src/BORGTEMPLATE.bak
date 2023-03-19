@@ -1,0 +1,67 @@
+/* import { B, Borg } from ".";
+import { InferParsedType } from "./types";
+
+const testFn = <TArg extends Borg | string>(arg: TArg) => {
+    if (typeof arg === "string") {
+        return arg;
+    } else {
+        return arg.bsonSchema();
+    }
+    }
+type TemplateLiteralPrimitive = string | number | boolean | null | undefined | bigint;
+type ZipStrings<T extends string[], U extends TemplateLiteralPrimitive[], P extends string> = [T, U, P] extends [[...infer THead extends string[], infer TTail extends string], [...infer UHead extends TemplateLiteralPrimitive[], infer UTail extends TemplateLiteralPrimitive], infer TPrev extends string] ? 
+    [TTail, THead, UTail, UHead, TPrev] extends [string, string[], TemplateLiteralPrimitive, TemplateLiteralPrimitive[], string] ?
+       ZipStrings<THead, UHead, `${TPrev}${TTail}${UTail}`> :
+    [TTail, THead, UTail, UHead, TPrev] extends [string, never[], TemplateLiteralPrimitive, never[], string] ?
+         `${TPrev}${TTail}${UTail}`
+    : never
+    : never
+
+type TemplateBorg<
+    TStrings extends string[],
+    TValues extends Borg[],
+    > = {
+        <TArg extends string | Borg>(TArg: TArg): TArg extends string ? TemplateBorg<[...TStrings, TArg], TValues> : TArg extends Borg ? TemplateBorg<TStrings, [...TValues, TArg]> : never;
+        parse: (result: unknown) => ZipStrings<TStrings, { [key in keyof TValues]: InferParsedType<TValues[key]> }, "">;
+    };
+
+const parseTemplateFn = (result: unknown) => {
+    return result
+}
+
+//@ts-ignore
+const template: TemplateBorg<[], []> = (arg) => {
+    const r = template(arg)
+    r.parse = parseTemplateFn as any;
+    return r;
+};
+
+const teststr = template("My name is ")(B.string())(" and I am ")(B.string())(" years old.").parse("")
+
+
+class BorgTemplate<
+    const T extends string[] = [],
+    const TValues extends Borg[] = [],
+> extends Borg {
+    #strings: string[] = [];
+    #values: Borg[] = [];
+
+    constructor(
+        initial: string | Borg
+    ) {
+        super();
+        if (typeof initial === "string") {
+            this.#strings.push(initial);
+        } else {
+            this.#values.push(initial);
+        }
+    }
+
+
+}
+ */
+//@ts-expect-error - vitest handles import.meta
+if (import.meta.vitest) {
+    const { it } = await import("vitest");
+    it("should do nothing", () => {});
+  }
