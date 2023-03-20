@@ -50,11 +50,14 @@
     "typescript": "^5.0.2",
     "vitest": "^0.29.3"
   },
-  "overrides": {
-    "typescript": "$typescript"
-  },
   "dependencies": {
     "bson": "^5.0.1"
+  },
+  "prettier": {
+    "semi": true,
+    "trailingComma": "all",
+    "arrowParens": "avoid",
+    "tabWidth": 2
   },
   "tsup": {
     "minify": true,
