@@ -104,29 +104,29 @@ describe("Scalars", () => {
       expect(nullableOptional.parse(null)).toBeNull();
       expect(nullableOptional.parse(undefined)).toBeUndefined();
       let priv = schema.private();
-      expect(priv.parse(value)).toSatisfy((x: any) => typeof x === "symbol");
-      expect(priv.parse(null)).toSatisfy((x: any) => typeof x === "symbol");
-      expect(priv.parse(undefined)).toSatisfy((x: any) => typeof x === "symbol")
+      expect(priv.parse(value)).toEqual(value);
+      expect(() => priv.parse(null)).toThrow();
+      expect(() => priv.parse(undefined)).toThrow();
       let privNullable = schema.private().nullable();
-      expect(privNullable.parse(value)).toSatisfy((x: any) => typeof x === "symbol");
-      expect(privNullable.parse(null)).toSatisfy((x: any) => typeof x === "symbol");
-      expect(privNullable.parse(undefined)).toSatisfy((x: any) => typeof x === "symbol");
+      expect(privNullable.parse(value)).toEqual(value);
+      expect(privNullable.parse(null)).toBeNull();
+      expect(() => privNullable.parse(undefined)).toThrow();
       let privOptional = schema.private().optional();
-      expect(privOptional.parse(value)).toSatisfy((x: any) => typeof x === "symbol");
-      expect(privOptional.parse(null)).toSatisfy((x: any) => typeof x === "symbol");
-      expect(privOptional.parse(undefined)).toSatisfy((x: any) => typeof x === "symbol");
+      expect(privOptional.parse(value)).toEqual(value);
+      expect(() => privOptional.parse(null)).toThrow();
+      expect(privOptional.parse(undefined)).toBeUndefined();
       let privNullish = schema.private().nullish();
-      expect(privNullish.parse(value)).toSatisfy((x: any) => typeof x === "symbol");
-      expect(privNullish.parse(null)).toSatisfy((x: any) => typeof x === "symbol");
-      expect(privNullish.parse(undefined)).toSatisfy((x: any) => typeof x === "symbol");
+      expect(privNullish.parse(value)).toEqual(value);
+      expect(privNullish.parse(null)).toBeNull();
+      expect(privNullish.parse(undefined)).toBeUndefined();
       let privOptionalNullable = schema.private().optional().nullable();
-      expect(privOptionalNullable.parse(value)).toSatisfy((x: any) => typeof x === "symbol");
-      expect(privOptionalNullable.parse(null)).toSatisfy((x: any) => typeof x === "symbol");
-      expect(privOptionalNullable.parse(undefined)).toSatisfy((x: any) => typeof x === "symbol");
+      expect(privOptionalNullable.parse(value)).toEqual(value);
+      expect(privOptionalNullable.parse(null)).toBeNull();
+      expect(privOptionalNullable.parse(undefined)).toBeUndefined();
       let privNullableOptional = schema.private().nullable().optional();
-      expect(privNullableOptional.parse(value)).toSatisfy((x: any) => typeof x === "symbol");
-      expect(privNullableOptional.parse(null)).toSatisfy((x: any) => typeof x === "symbol");
-      expect(privNullableOptional.parse(undefined)).toSatisfy((x: any) => typeof x === "symbol");
+      expect(privNullableOptional.parse(value)).toEqual(value);
+      expect(privNullableOptional.parse(null)).toBeNull();
+      expect(privNullableOptional.parse(undefined)).toBeUndefined();
       let notNull = nullable.notNull();
       expect(notNull.parse(value)).toEqual(value);
       expect(() => notNull.parse(null)).toThrow();
@@ -141,13 +141,22 @@ describe("Scalars", () => {
       expect(() => notNullish.parse(undefined)).toThrow();
       let nullishRequired = nullish.required();
       expect(nullishRequired.parse(value)).toEqual(value);
-      expect(nullishRequired.parse(null)).toBeNull()
+      expect(nullishRequired.parse(null)).toBeNull();
       expect(() => nullishRequired.parse(undefined)).toThrow();
       let nullishNotNull = nullish.nullish().notNull();
       expect(nullishNotNull.parse(value)).toEqual(value);
       expect(() => nullishNotNull.parse(null)).toThrow();
       expect(nullishNotNull.parse(undefined)).toBeUndefined();
-      let convoluted = schema.private().nullable().optional().notNull().required().nullish().notNullish().public().nullable()
+      let convoluted = schema
+        .private()
+        .nullable()
+        .optional()
+        .notNull()
+        .required()
+        .nullish()
+        .notNullish()
+        .public()
+        .nullable();
       let convolutedOptional = convoluted.optional();
       expect(convolutedOptional.parse(value)).toEqual(value);
       expect(convolutedOptional.parse(null)).toBeNull();
@@ -173,9 +182,9 @@ describe("Scalars", () => {
       expect(() => convolutedNotNullish.parse(null)).toThrow();
       expect(() => convolutedNotNullish.parse(undefined)).toThrow();
       let convolutedPrivate = convoluted.private();
-      expect(convolutedPrivate.parse(value)).toSatisfy((x: any) => typeof x === "symbol");
-      expect(convolutedPrivate.parse(null)).toSatisfy((x: any) => typeof x === "symbol");
-      expect(convolutedPrivate.parse(undefined)).toSatisfy((x: any) => typeof x === "symbol");
+      expect(convolutedPrivate.parse(value)).toEqual(value);
+      expect(convolutedPrivate.parse(null)).toBeNull();
+      expect(() => convolutedPrivate.parse(undefined)).toThrow();
       let convolutedPublic = convoluted.public();
       expect(convolutedPublic.parse(value)).toEqual(value);
       expect(convolutedPublic.parse(null)).toBeNull();
