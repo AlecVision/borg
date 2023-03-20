@@ -641,37 +641,37 @@ if (import.meta.vitest) {
   describe("Parsing", () => {
     it("should parse valid inputs", () => {
       const parsedStrings = stringTestObject.parse(stringsMock);
-      const { private: _, ...expectedStrings } = stringsMock;
-      expect(parsedStrings).toEqual(expectedStrings);
+      expect(parsedStrings).toEqual(stringsMock);
 
       const parsedNumbers = numberTestObject.parse(numbersMock);
-      const { private: __, ...expectedNumbers } = numbersMock;
-      expect(parsedNumbers).toEqual(expectedNumbers);
+      expect(parsedNumbers).toEqual(numbersMock);
 
       const parsedScalars = scalarsTestObject.parse(scalarsMock);
 
       expect(parsedScalars).toEqual({
         strings: {
-          base: expectedStrings,
+          base: stringsMock,
           nullable: null,
+          private: stringsMock,
           optionalNullable: undefined,
-          optionalRequired: expectedStrings,
+          optionalRequired: stringsMock,
           nullableOptional: null,
-          nullableNotNull: expectedStrings,
-          nullishNotNullish: expectedStrings,
-          privatePublic: expectedStrings,
-          arbitraryChaining: expectedStrings,
+          nullableNotNull: stringsMock,
+          nullishNotNullish: stringsMock,
+          privatePublic: stringsMock,
+          arbitraryChaining: stringsMock,
         },
         numbers: {
-          base: expectedNumbers,
+          base: numbersMock,
           nullable: null,
+          private: numbersMock,
           optionalNullable: undefined,
-          optionalRequired: expectedNumbers,
+          optionalRequired: numbersMock,
           nullableOptional: null,
-          nullableNotNull: expectedNumbers,
-          nullishNotNullish: expectedNumbers,
-          privatePublic: expectedNumbers,
-          arbitraryChaining: expectedNumbers,
+          nullableNotNull: numbersMock,
+          nullishNotNullish: numbersMock,
+          privatePublic: numbersMock,
+          arbitraryChaining: numbersMock,
         },
       });
     });

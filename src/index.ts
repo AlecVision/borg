@@ -257,7 +257,6 @@ class BorgObject<
             [key],
           );
         }
-        result[key] = undefined;
         continue;
       }
       try {
