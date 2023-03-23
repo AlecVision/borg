@@ -1548,8 +1548,8 @@ const B = {
   string: () => new BorgString(),
   number: () => new BorgNumber(),
   boolean: () => new BorgBoolean(),
-  array: <const TBorg extends _.Borg>(itemSchema: TBorg) => new BorgArray(itemSchema),
-  object: <const T extends { [key: string]: _.Borg }>(shape: T) =>
+  array: <TBorg extends _.Borg>(itemSchema: TBorg) => new BorgArray(itemSchema),
+  object: <T extends { [key: string]: _.Borg }>(shape: T) =>
     new BorgObject(shape),
   model: makeBorg,
 };
