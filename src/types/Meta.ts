@@ -18,10 +18,10 @@ export type Meta = PrettyPrint<
         kind: "object";
         keys: (string | undefined)[];
         requiredKeys: (string | undefined)[];
-        shape: { [key: string]: Borg };
+        borgShape: { [key: string]: Borg };
       }
     | {
-        itemsBorg: Borg;
+        borgItems: Borg;
         kind: "array";
         maxItems: number | null;
         minItems: number | null;
@@ -55,15 +55,15 @@ export type ObjectMeta<
   kind: "object";
   keys: Array<Extract<keyof TShape, string>>;
   requiredKeys: RequiredKeysArray<TShape>;
-  shape: TShape;
+  borgShape: TShape;
 } & GetFlags<TFlags>>;
 
 export type ArrayMeta<
-  TItemBorg extends Borg,
   TFlags extends Flags,
   TLength extends MinMax,
+  TItemBorg extends B.AnyBorg,
 > = PrettyPrint<{
-  itemsBorg: TItemBorg;
+  borgItems: TItemBorg;
   kind: "array";
   maxItems: TLength[1];
   minItems: TLength[0];
@@ -81,13 +81,19 @@ export type StringMeta<
   regex: TPattern extends ".*" ? undefined : RegExp;
 } & GetFlags<TFlags>>;
 
-export type NumberMeta<TFlags extends Flags, TRange extends MinMax> = PrettyPrint<{
+export type NumberMeta<
+  TFlags extends Flags,
+  TRange extends MinMax,
+> = PrettyPrint<{
   kind: "number";
   max: TRange[1];
   min: TRange[0];
 } & GetFlags<TFlags>>;
 
-export type IdMeta<TFlags extends Flags, TFormat extends string | ObjectId> = PrettyPrint<{
+export type IdMeta<
+  TFlags extends Flags,
+  TFormat extends string | ObjectId,
+> = PrettyPrint<{
   kind: "id";
   format: TFormat extends ObjectId ? "oid" : "string";
 } & GetFlags<TFlags>>;
