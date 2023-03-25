@@ -159,6 +159,27 @@ class BorgObject<
     return result;
   }
 
+  try(input: unknown): _.TryResult<this> {
+    try {
+      const value = this.parse(input) as any;
+      return {
+        value,
+        ok: true,
+        meta: this.meta,
+        serialize: () => this.serialize.call(this, value),
+      } as any;
+    } catch (e) {
+      if (e instanceof BorgError) return { ok: false, error: e } as any;
+      else
+        return {
+          ok: false,
+          error: new BorgError(
+            `OBJECT_ERROR(try): Unknown error parsing: \n\t${JSON.stringify(e)}`,
+          )
+        } as any;
+    }
+  }
+
   serialize(
     input: B.Type<this>,
   ): _.Sanitized<{ [k in keyof TShape]: B.Serialized<TShape[k]> }, TFlags> {
@@ -433,6 +454,27 @@ class BorgArray<
     return result;
   }
 
+  try(input: unknown): _.TryResult<this> {
+    try {
+      const value = this.parse(input) as any;
+      return {
+        value,
+        ok: true,
+        meta: this.meta,
+        serialize: () => this.serialize.call(this, value),
+      } as any;
+    } catch (e) {
+      if (e instanceof BorgError) return { ok: false, error: e } as any;
+      else
+        return {
+          ok: false,
+          error: new BorgError(
+            `ARRAY_ERROR(try): Unknown error parsing: \n\t${JSON.stringify(e)}`,
+          )
+        } as any;
+    }
+  }
+
   serialize(
     input: B.Type<this>,
   ): _.Sanitized<Array<B.Serialized<TItemSchema>>, TFlags> {
@@ -685,6 +727,26 @@ class BorgString<
     }
     return input as any;
   }
+  try(input: unknown): _.TryResult<this> {
+    try {
+      const value = this.parse(input) as any;
+      return {
+        value,
+        ok: true,
+        meta: this.meta,
+        serialize: () => this.serialize.call(this, value),
+      } as any;
+    } catch (e) {
+      if (e instanceof BorgError) return { ok: false, error: e } as any;
+      else
+        return {
+          ok: false,
+          error: new BorgError(
+            `STRING_ERROR(try): Unknown error parsing: \n\t${JSON.stringify(e)}`,
+          )
+        } as any;
+    }
+  }
 
   serialize(input: B.Type<this>): _.Sanitized<B.Type<this>, TFlags> {
     if (this.#flags.private) {
@@ -901,6 +963,27 @@ class BorgNumber<
     return input as any;
   }
 
+  try(input: unknown): _.TryResult<this> {
+    try {
+      const value = this.parse(input) as any;
+      return {
+        value,
+        ok: true,
+        meta: this.meta,
+        serialize: () => this.serialize.call(this, value),
+      } as any;
+    } catch (e) {
+      if (e instanceof BorgError) return { ok: false, error: e } as any;
+      else
+        return {
+          ok: false,
+          error: new BorgError(
+            `NUMBER_ERROR(try): Unknown error parsing: \n\t${JSON.stringify(e)}`,
+          )
+        } as any;
+    }
+  }
+
   serialize(input: B.Type<this>): _.Sanitized<B.Type<this>, TFlags> {
     if (this.#flags.private) {
       throw new BorgError(
@@ -1082,6 +1165,27 @@ class BorgBoolean<
       );
     }
     return input as any;
+  }
+
+  try(input: unknown): _.TryResult<this> {
+    try {
+      const value = this.parse(input) as any;
+      return {
+        value,
+        ok: true,
+        meta: this.meta,
+        serialize: () => this.serialize.call(this, value),
+      } as any;
+    } catch (e) {
+      if (e instanceof BorgError) return { ok: false, error: e } as any;
+      else
+        return {
+          ok: false,
+          error: new BorgError(
+            `BOOLEAN_ERROR(try): Unknown error parsing: \n\t${JSON.stringify(e)}`,
+          )
+        } as any;
+      }
   }
 
   serialize(input: B.Type<this>): _.Sanitized<B.Type<this>, TFlags> {
@@ -1272,6 +1376,27 @@ class BorgId<
         this.#flags.optional ? " or undefined," : ""
       }${this.#flags.nullable ? " or null," : ""} got ${typeof input}`,
     );
+  }
+
+  try(input: unknown): _.TryResult<this> {
+    try {
+      const value = this.parse(input) as any;
+      return {
+        value,
+        ok: true,
+        meta: this.meta,
+        serialize: () => this.serialize.call(this, value),
+      } as any;
+    } catch (e) {
+      if (e instanceof BorgError) return { ok: false, error: e } as any;
+      else
+        return {
+          ok: false,
+          error: new BorgError(
+            `ID_ERROR(try): Unknown error parsing: \n\t${JSON.stringify(e)}`,
+          )
+        } as any;
+    }
   }
 
   serialize(input: B.Type<this>): _.Sanitized<string, TFlags> {
@@ -1481,7 +1606,7 @@ declare module B {
     TFlags extends _.Flags = _.Flags,
     TShape extends { [key: string]: _.Borg } = { [key: string]: _.Borg },
   > = BorgObject<TFlags, TShape>;
-  
+
   export type Borg = _.Borg;
   export type Type<T extends _.Borg> = _.Type<T>;
   export type BsonType<T extends _.Borg> = _.BsonType<T>;

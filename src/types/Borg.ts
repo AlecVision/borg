@@ -1,4 +1,5 @@
-import { Meta } from "./Meta";
+import { BorgError } from "src/errors";
+import { Meta, MetaFromBorg } from "./Meta";
 
 /////////////////////////////////////////////////////////////////////////////////////////////
 ///                                                                                       ///
@@ -28,6 +29,7 @@ export abstract class Borg {
   abstract get bsonSchema(): any;
   abstract copy(): Borg;
   abstract parse(input: unknown): any;
+  abstract try(input: unknown): TryResult<this>
   abstract serialize(input: any): any;
   abstract deserialize(input: any): any;
   abstract toBson(input: any): any;
@@ -74,3 +76,16 @@ export type Serialized<TBorg extends { serialize: (arg0: any) => any }> =
   ReturnType<TBorg["serialize"]>;
 export type Deserialized<TBorg extends { deserialize: (arg0: any) => any }> =
   ReturnType<TBorg["deserialize"]>;
+
+
+export type TryResult<TBorg> = TBorg extends infer B extends Borg?
+| {
+    ok: true;
+    value: Type<B>;
+    meta: MetaFromBorg<Borg>;
+    serialize: () => Serialized<B>
+  }
+| {
+    ok: false;
+    error: BorgError;
+  } : never
