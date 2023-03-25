@@ -101,3 +101,20 @@ export type IdMeta<
 export type BooleanMeta<TFlags extends Flags> = PrettyPrint<{
   kind: "boolean";
 } & GetFlags<TFlags>>;
+
+export type MetaFromBorg<TBorg extends Borg> = TBorg extends ObjectMeta<
+  infer TFlags,
+  infer TShape
+>
+  ? ObjectMeta<TFlags, TShape>
+  : TBorg extends ArrayMeta<infer TItemBorg, infer TFlags, infer TLength>
+  ? ArrayMeta<TItemBorg, TFlags, TLength>
+  : TBorg extends StringMeta<infer TFlags, infer TLength, infer TPattern>
+  ? StringMeta<TFlags, TLength, TPattern>
+  : TBorg extends NumberMeta<infer TFlags, infer TRange>
+  ? NumberMeta<TFlags, TRange>
+  : TBorg extends IdMeta<infer TFlags, infer TFormat>
+  ? IdMeta<TFlags, TFormat>
+  : TBorg extends BooleanMeta<infer TFlags>
+  ? BooleanMeta<TFlags>
+  : Meta
