@@ -34,7 +34,7 @@ const makeOptionalRecursive = (schema: B.Borg): B.Borg => {
   if (schema.meta.kind === "object") {
     const out = B.object(
       Object.fromEntries(
-        Object.entries(schema.meta.shape).map(([key, value]) => [
+        Object.entries(schema.meta.borgShape).map(([key, value]) => [
           key,
           makeOptionalRecursive(value),
         ]),
@@ -45,7 +45,7 @@ const makeOptionalRecursive = (schema: B.Borg): B.Borg => {
     }
     return schema.meta.private ? out.private() : out;
   } else if (schema.meta.kind === "array") {
-    const out = B.array(makeOptionalRecursive(schema.meta.itemsBorg));
+    const out = B.array(makeOptionalRecursive(schema.meta.borgItems));
     if (schema.meta.nullable) {
       return schema.meta.private ? out.private().nullable() : out.nullable();
     }
@@ -58,14 +58,14 @@ const makeNullableRecursive = (schema: B.Borg): B.Borg => {
   if (schema.meta.kind === "object") {
     return B.object(
       Object.fromEntries(
-        Object.entries(schema.meta.shape).map(([key, value]) => [
+        Object.entries(schema.meta.borgShape).map(([key, value]) => [
           key,
           makeNullableRecursive(value),
         ]),
       ),
     ).nullable();
   } else if (schema.meta.kind === "array") {
-    return B.array(makeNullableRecursive(schema.meta.itemsBorg)).nullable();
+    return B.array(makeNullableRecursive(schema.meta.borgItems)).nullable();
   }
   return schema.nullable();
 };
