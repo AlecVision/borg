@@ -7,6 +7,7 @@ import {
   RequiredKeysArray,
   PrettyPrint,
 } from ".";
+import B from "src";
 
 export type Meta = PrettyPrint<
   {
@@ -61,7 +62,7 @@ export type ObjectMeta<
 export type ArrayMeta<
   TFlags extends Flags,
   TLength extends MinMax,
-  TItemBorg extends B.AnyBorg,
+  TItemBorg extends Borg,
 > = PrettyPrint<{
   borgItems: TItemBorg;
   kind: "array";
@@ -102,19 +103,19 @@ export type BooleanMeta<TFlags extends Flags> = PrettyPrint<{
   kind: "boolean";
 } & GetFlags<TFlags>>;
 
-export type MetaFromBorg<TBorg extends Borg> = TBorg extends ObjectMeta<
+export type MetaFromBorg<TBorg extends Borg> = TBorg extends B.Object<
   infer TFlags,
   infer TShape
 >
   ? ObjectMeta<TFlags, TShape>
-  : TBorg extends ArrayMeta<infer TItemBorg, infer TFlags, infer TLength>
+  : TBorg extends B.Array<infer TItemBorg, infer TFlags, infer TLength>
   ? ArrayMeta<TItemBorg, TFlags, TLength>
-  : TBorg extends StringMeta<infer TFlags, infer TLength, infer TPattern>
+  : TBorg extends B.String<infer TFlags, infer TLength, infer TPattern>
   ? StringMeta<TFlags, TLength, TPattern>
-  : TBorg extends NumberMeta<infer TFlags, infer TRange>
+  : TBorg extends B.Number<infer TFlags, infer TRange>
   ? NumberMeta<TFlags, TRange>
-  : TBorg extends IdMeta<infer TFlags, infer TFormat>
+  : TBorg extends B.Id<infer TFlags, infer TFormat>
   ? IdMeta<TFlags, TFormat>
-  : TBorg extends BooleanMeta<infer TFlags>
+  : TBorg extends B.Boolean<infer TFlags>
   ? BooleanMeta<TFlags>
   : Meta

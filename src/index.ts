@@ -163,7 +163,7 @@ class BorgObject<
     return result;
   }
 
-  try(input: unknown): _.TryResult<this> {
+  try(input: unknown): _.TryResult<BorgObject<TFlags, TShape>> {
     try {
       const value = this.parse(input) as any;
       return {
@@ -462,7 +462,7 @@ class BorgArray<
     return result;
   }
 
-  try(input: unknown): _.TryResult<this> {
+  try(input: unknown): _.TryResult<BorgArray<TFlags, TLength, TItemSchema>> {
     try {
       const value = this.parse(input) as any;
       return {
@@ -739,7 +739,7 @@ class BorgString<
     }
     return input as any;
   }
-  try(input: unknown): _.TryResult<this> {
+  try(input: unknown): _.TryResult<BorgString<TFlags, TLength, TPattern>> {
     try {
       const value = this.parse(input) as any;
       return {
@@ -979,7 +979,7 @@ class BorgNumber<
     return input as any;
   }
 
-  try(input: unknown): _.TryResult<this> {
+  try(input: unknown): _.TryResult<BorgNumber<TFlags, TLength>> {
     try {
       const value = this.parse(input) as any;
       return {
@@ -1187,7 +1187,7 @@ class BorgBoolean<
     return input as any;
   }
 
-  try(input: unknown): _.TryResult<this> {
+  try(input: unknown): _.TryResult<BorgBoolean<TFlags>> {
     try {
       const value = this.parse(input) as any;
       return {
@@ -1402,7 +1402,7 @@ class BorgId<
     );
   }
 
-  try(input: unknown): _.TryResult<this> {
+  try(input: unknown): _.TryResult<BorgId<TFlags, TFormat>> {
     try {
       const value = this.parse(input) as any;
       return {

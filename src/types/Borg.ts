@@ -29,7 +29,7 @@ export abstract class Borg {
   abstract get bsonSchema(): any;
   abstract copy(): Borg;
   abstract parse(input: unknown): any;
-  abstract try(input: unknown): TryResult<this>
+  abstract try(input: unknown): TryResult<any>
   abstract is(input: unknown): input is Type<this>;
   abstract serialize(input: any): any;
   abstract deserialize(input: any): any;
@@ -83,7 +83,7 @@ export type TryResult<TBorg> = TBorg extends infer B extends Borg?
 | {
     ok: true;
     value: Type<B>;
-    meta: MetaFromBorg<Borg>;
+    meta: MetaFromBorg<B>;
     serialize: () => Serialized<B>
   }
 | {

@@ -19,7 +19,7 @@ const numArr = B.array(number);
 const boolArr = B.array(boolean);
 const oidArr = B.array(oid);
 const arr1arr = B.array(arr1);
-//@ts-expect-error
+
 const obj2 = B.object({
   obj1,
   arr1,
@@ -28,7 +28,12 @@ const obj2 = B.object({
   numArr,
   boolArr,
   oidArr,
-}).meta.requiredKeys;
+})
+
+const tried = obj2.try({})
+if (tried.ok) {
+  console.log(tried.meta)
+}
 
 const makeOptionalRecursive = (schema: B.Borg): B.Borg => {
   if (schema.meta.kind === "object") {
