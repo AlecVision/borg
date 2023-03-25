@@ -30,6 +30,7 @@ export abstract class Borg {
   abstract copy(): Borg;
   abstract parse(input: unknown): any;
   abstract try(input: unknown): TryResult<this>
+  abstract is(input: unknown): input is Type<this>;
   abstract serialize(input: any): any;
   abstract deserialize(input: any): any;
   abstract toBson(input: any): any;

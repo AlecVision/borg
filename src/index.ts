@@ -75,6 +75,10 @@ class BorgObject<
     return _.getBsonSchema(this.meta);
   }
 
+  is(input: unknown): input is ReturnType<this["parse"]> {
+    return this.try(input).ok;
+  }
+
   copy(): this {
     return BorgObject.#clone(this);
   }
@@ -387,6 +391,10 @@ class BorgArray<
     return _.getBsonSchema(this.meta);
   }
 
+  is(input: unknown): input is ReturnType<this["parse"]> {
+    return this.try(input).ok;
+  }
+
   copy(): this {
     return BorgArray.#clone(this);
   }
@@ -676,6 +684,10 @@ class BorgString<
     return _.getBsonSchema(this.meta);
   }
 
+  is(input: unknown): input is ReturnType<this["parse"]> {
+    return this.try(input).ok;
+  }
+
   copy(): this {
     return BorgString.#clone(this);
   }
@@ -918,6 +930,10 @@ class BorgNumber<
     return _.getBsonSchema(this.meta);
   }
 
+  is(input: unknown): input is ReturnType<this["parse"]> {
+    return this.try(input).ok;
+  }
+
   copy(): this {
     return BorgNumber.#clone(this);
   }
@@ -1136,6 +1152,10 @@ class BorgBoolean<
     return _.getBsonSchema(this.meta);
   }
 
+  is(input: unknown): input is ReturnType<this["parse"]> {
+    return this.try(input).ok;
+  }
+
   copy(): this {
     return BorgBoolean.#clone(this);
   }
@@ -1324,6 +1344,10 @@ class BorgId<
 
   get bsonSchema() {
     return _.getBsonSchema(this.meta);
+  }
+
+  is(input: unknown): input is ReturnType<this["parse"]> {
+    return this.try(input).ok;
   }
 
   copy(): this {
