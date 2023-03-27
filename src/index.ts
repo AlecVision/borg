@@ -595,17 +595,17 @@ class BorgArray<
     return clone as any;
   }
 
-  minLength<const N extends number>(
-    length: N,
-  ): BorgArray<TFlags, [N, TLength[1]], TItemSchema> {
+  minLength<const Min extends number>(
+    length: Min,
+  ): BorgArray<TFlags, [Min, TLength[1]], TItemSchema> {
     const clone = this.copy();
     clone.#min = length;
     return clone as any;
   }
 
-  maxLength<const N extends number>(
-    length: N,
-  ): BorgArray<TFlags, [TLength[0], N], TItemSchema> {
+  maxLength<const Max extends number>(
+    length: Max,
+  ): BorgArray<TFlags, [TLength[0], Max], TItemSchema> {
     const clone = this.copy();
     clone.#max = length;
     return clone as any;
@@ -749,7 +749,7 @@ class BorgString<
         }, got ${input.length}`,
       );
     }
-    if (this.#pattern !== null && !new RegExp(this.#pattern).test(input)) {
+    if (this.#pattern !== null && !new RegExp(this.#pattern, "u").test(input)) {
       throw new BorgError(
         `STRING_ERROR: Expected string to match pattern ${
           this.#pattern
@@ -854,17 +854,17 @@ class BorgString<
     return clone as any;
   }
 
-  minLength<const N extends number | null>(
-    length: N,
-  ): BorgString<TFlags, [N, TLength[1]], TPattern> {
+  minLength<const Min extends number | null>(
+    length: Min,
+  ): BorgString<TFlags, [Min, TLength[1]], TPattern> {
     const clone = this.copy();
     clone.#min = length;
     return clone as any;
   }
 
-  maxLength<const N extends number | null>(
-    length: N,
-  ): BorgString<TFlags, [TLength[0], N], TPattern> {
+  maxLength<const Max extends number | null>(
+    length: Max,
+  ): BorgString<TFlags, [TLength[0], Max], TPattern> {
     const clone = this.copy();
     clone.#max = length;
     return clone as any;
