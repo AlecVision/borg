@@ -1,7 +1,9 @@
 import { ObjectId } from "bson";
-import { Flags, MinMax, Borg, Meta, PrettyPrint, ObjectMeta, ArrayMeta, BooleanMeta, IdMeta, NumberMeta, StringMeta } from ".";
+import { Flags, MinMax, Borg, UnionMeta, ArrayMeta, BooleanMeta, IdMeta, Meta, NumberMeta, ObjectMeta, PrettyPrint, StringMeta } from ".";
 
 export type BsonSchema<TMeta extends Meta> = PrettyPrint<
+  TMeta extends UnionMeta<infer TFlags extends Flags, infer TBorgs extends Borg[][number]>
+    ? UnionBsonSchema<UnionMeta<TFlags, TBorgs>> :
   TMeta extends ObjectMeta<infer TFlags extends Flags, infer TShape extends {[k in infer _k]: infer _b extends Borg}>
     ? ObjectBsonSchema<ObjectMeta<TFlags, TShape>>
     : TMeta extends ArrayMeta<infer TFlags extends Flags, infer TMinMax extends MinMax, infer TItems>
@@ -16,6 +18,10 @@ export type BsonSchema<TMeta extends Meta> = PrettyPrint<
     ? BooleanBsonSchema<BooleanMeta<TFlags>>
     : never
 >;
+
+type UnionBsonSchema<TMeta extends Extract<Meta, { kind: "union" }>> = {
+  oneOf: [...TMeta["borgMembers"]["bsonSchema"][], ...(TMeta["nullable"] extends true ? [{ bsonType: "null" }] : [])];
+};
 
 type IdBsonSchema<TMeta extends Extract<Meta, { kind: "id" }>> = {
   bsonType: TMeta["nullable"] extends true ? ["objectId", "null"] : "objectId";
@@ -56,6 +62,12 @@ export function getBsonSchema<const TMeta extends Meta>(
   meta: TMeta
 ): BsonSchema<TMeta> {
   switch (meta.kind) {
+    case "union": {
+        const { nullable, borgMembers } = meta;
+        return Object.freeze({
+            oneOf: [...borgMembers.map((m) => getBsonSchema(m.meta)), ...(nullable ? [{ bsonType: "null" }] : [])],
+        }) as any;
+    }
     case "string": {
       const { minLength: min, maxLength: max, nullable, regex } = meta;
       return Object.freeze({

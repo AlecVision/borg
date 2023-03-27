@@ -178,8 +178,10 @@ class BorgObject<
         return {
           ok: false,
           error: new BorgError(
-            `OBJECT_ERROR(try): Unknown error parsing: \n\t${JSON.stringify(e)}`,
-          )
+            `OBJECT_ERROR(try): Unknown error parsing: \n\t${JSON.stringify(
+              e,
+            )}`,
+          ),
         } as any;
     }
   }
@@ -478,7 +480,7 @@ class BorgArray<
           ok: false,
           error: new BorgError(
             `ARRAY_ERROR(try): Unknown error parsing: \n\t${JSON.stringify(e)}`,
-          )
+          ),
         } as any;
     }
   }
@@ -756,8 +758,10 @@ class BorgString<
         return {
           ok: false,
           error: new BorgError(
-            `STRING_ERROR(try): Unknown error parsing: \n\t${JSON.stringify(e)}`,
-          )
+            `STRING_ERROR(try): Unknown error parsing: \n\t${JSON.stringify(
+              e,
+            )}`,
+          ),
         } as any;
     }
   }
@@ -1005,8 +1009,10 @@ class BorgNumber<
         return {
           ok: false,
           error: new BorgError(
-            `NUMBER_ERROR(try): Unknown error parsing: \n\t${JSON.stringify(e)}`,
-          )
+            `NUMBER_ERROR(try): Unknown error parsing: \n\t${JSON.stringify(
+              e,
+            )}`,
+          ),
         } as any;
     }
   }
@@ -1217,10 +1223,12 @@ class BorgBoolean<
         return {
           ok: false,
           error: new BorgError(
-            `BOOLEAN_ERROR(try): Unknown error parsing: \n\t${JSON.stringify(e)}`,
-          )
+            `BOOLEAN_ERROR(try): Unknown error parsing: \n\t${JSON.stringify(
+              e,
+            )}`,
+          ),
         } as any;
-      }
+    }
   }
 
   serialize(input: B.Type<this>): _.Sanitized<B.Type<this>, TFlags> {
@@ -1433,7 +1441,7 @@ class BorgId<
           ok: false,
           error: new BorgError(
             `ID_ERROR(try): Unknown error parsing: \n\t${JSON.stringify(e)}`,
-          )
+          ),
         } as any;
     }
   }
@@ -1530,6 +1538,220 @@ class BorgId<
 
 /////////////////////////////////////////////////////////////////////////////////////////////
 ///                                                                                       ///
+///  BBBBBBBBBBBBBBBBB                             OOOOOOOOOOOO     RRRRRRRRRRRRRRRRR     ///
+///  B////////////////B                          OO////////////OO   R////////////////R    ///
+///  B/////////////////B                        OO//////////////OO  R/////////////////R   ///
+///  B//////BBBBBB//////B                      O///////OOO////////O R//////RRRRRRR/////R  ///
+///  BB/////B     B/////B                      O//////O   O///////O RR/////R      R////R  ///
+///    B////B     B/////B                      O/////O     O//////O   R////R      R////R  ///
+///    B////B     B/////B                      O/////O     O//////O   R////R      R////R  ///
+///    B////BBBBBB/////B    ################   O/////O     O//////O   R////RRRRRRR////R   ///
+///    B////////////BB      #//////////////#   O/////O     O//////O   R/////////////RR    ///
+///    B////BBBBBB/////B    #//////////////#   O/////O     O//////O   R////RRRRRRR////R   ///
+///    B////B     B/////B   ################   O/////O     O//////O   R////R      R////R  ///
+///    B////B     B/////B                      O/////O     O//////O   R////R      R////R  ///
+///    B////B     B/////B                      O/////O     O//////O   R////R      R////R  ///
+///  BB/////BBBBBB//////B                      O///////OOO////////O RR/////R      R////R  ///
+///  B/////////////////B                       OO///////////////OO  R//////R      R////R  ///
+///  B////////////////B                         OO/////////////OO   R//////R      R////R  ///
+///  BBBBBBBBBBBBBBBBB                            OOOOOOOOOOOOOO    RRRRRRRR      RRRRRR  ///
+///                                                                                       ///
+/////////////////////////////////////////////////////////////////////////////////////////////
+
+export class BorgUnion<
+  const TFlags extends _.Flags = _.Flags,
+  const TMembers extends _.Borg = _.Borg,
+> extends _.Borg {
+  #flags = {
+    optional: false,
+    nullable: false,
+    private: false,
+  };
+  #borgMembers: TMembers[];
+
+  constructor(memberSchemas: TMembers[]) {
+    super();
+    this.#borgMembers = memberSchemas;
+  }
+
+  get meta(): _.UnionMeta<TFlags, TMembers> {
+    return {
+      kind: "union",
+      borgMembers: this.#borgMembers,
+      ...this.#flags,
+    } as any;
+  }
+
+  get bsonSchema() {
+    return _.getBsonSchema(this.meta);
+  }
+
+  static #clone<const TBorg extends B.Union<any, any>>(borg: TBorg): TBorg {
+    const clone = new BorgUnion(borg.#borgMembers.map(m => m.copy()));
+    clone.#flags = { ...borg.#flags };
+    return clone as any;
+  }
+
+  copy(): this {
+    return BorgUnion.#clone(this);
+  }
+
+  parse(input: unknown): _.Parsed<_.Type<TMembers>[], TFlags> {
+    if (input === undefined) {
+      if (this.#flags.optional) return void 0 as any;
+      throw new BorgError(
+        `UNION_ERROR: Expected valid type${
+          this.#flags.nullable ? " or null" : ""
+        }, got undefined`,
+      );
+    }
+    if (input === null) {
+      if (this.#flags.nullable) return null as any;
+      throw new BorgError(
+        `UNION_ERROR: Expected valid type${
+          this.#flags.optional ? " or undefined" : ""
+        }, got null`,
+      );
+    }
+    const errors = [] as { ok: false; error: BorgError }[];
+    for (const schema of this.#borgMembers) {
+      const result = schema.try(input);
+      if (result.ok) return result.value;
+      errors.push(result);
+    }
+    throw new BorgError(
+      `UNION_ERROR: Expected valid type${
+        this.#flags.optional ? " or undefined" : ""
+      }${
+        this.#flags.nullable ? " or null" : ""
+      }, got ${input}.\n\nErrors: ${errors
+        .map(({ error }) =>
+          typeof error === "string"
+            ? error
+            : typeof error === "object" &&
+              error &&
+              "message" in error &&
+              typeof error.message === "string"
+            ? error.message
+            : "UNKNOWN ERROR",
+        )
+        .join("\n")}`,
+    );
+  }
+
+  try(input: unknown): _.TryResult<this> {
+    try {
+      const value = this.parse(input) as any;
+      return {
+        value,
+        ok: true,
+        meta: this.meta,
+        serialize: () => this.serialize.call(this, value),
+      } as any;
+    } catch (e) {
+      if (e instanceof BorgError) return { ok: false, error: e } as any;
+      else
+        return {
+          ok: false,
+          error: new BorgError(
+            `UNION_ERROR(try): Unknown error parsing: \n\t${JSON.stringify(e)}`,
+          ),
+        } as any;
+    }
+  }
+
+  is(input: unknown): input is ReturnType<this["parse"]> {
+    return this.try(input).ok;
+  }
+
+  //TODO: Serialization should result in { __borgMeta: /* META */, data: /* DATA */ }
+  serialize(input: B.Type<this>): _.Sanitized<B.Type<this>, TFlags> {
+    if (input === undefined || input === null) return input as any;
+    for (const type of this.#borgMembers)
+      if (type.is(input)) return type.serialize(input) as any;
+    throw new BorgError(`SERIALIZATION_ERROR: Invalid input`);
+  }
+
+  deserialize(input: B.Serialized<this>): _.Sanitized<_.Type<this>, TFlags> {
+    if (input === undefined || input === null) return input as any;
+    if (
+      typeof input === "string" ||
+      typeof input === "number" ||
+      typeof input === "boolean"
+    ) {
+      return input as any;
+    }
+    if (typeof input !== "object") {
+      
+    }
+  }
+
+  toBson(input: any): _.Parsed<any, TFlags> {
+    if (input === undefined || input === null) return input as any;
+    for (const type of this.#borgMembers) {
+      try {
+        return type.toBson(input);
+      } catch (err) {
+        if (err instanceof BorgError) continue;
+        throw err;
+      }
+    }
+    throw new BorgError(`UNION_ERROR: invalid type`);
+  }
+
+  optional(): BorgUnion<_.SetOptional<TFlags>, TMembers> {
+    const clone = this.copy();
+    clone.#flags.optional = true;
+    return clone as any;
+  }
+
+  nullable(): BorgUnion<_.SetNullable<TFlags>, TMembers> {
+    const clone = this.copy();
+    clone.#flags.nullable = true;
+    return clone as any;
+  }
+
+  nullish(): BorgUnion<_.SetNullish<TFlags>, TMembers> {
+    const clone = this.copy();
+    clone.#flags.optional = true;
+    clone.#flags.nullable = true;
+    return clone as any;
+  }
+
+  required(): BorgUnion<_.SetRequired<TFlags>, TMembers> {
+    const clone = this.copy();
+    clone.#flags.optional = false;
+    return clone as any;
+  }
+
+  notNull(): BorgUnion<_.SetNotNull<TFlags>, TMembers> {
+    const clone = this.copy();
+    clone.#flags.nullable = false;
+    return clone as any;
+  }
+
+  notNullish(): BorgUnion<_.SetNotNullish<TFlags>, TMembers> {
+    const clone = this.copy();
+    clone.#flags.optional = false;
+    clone.#flags.nullable = false;
+    return clone as any;
+  }
+
+  private(): BorgUnion<_.SetPrivate<TFlags>, TMembers> {
+    const clone = this.copy();
+    clone.#flags.private = true;
+    return clone as any;
+  }
+
+  public(): BorgUnion<_.SetPublic<TFlags>, TMembers> {
+    const clone = this.copy();
+    clone.#flags.private = false;
+    return clone as any;
+  }
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////
+///                                                                                       ///
 ///  BBBBBBBBBBBBBBBBB    MMMMMMM      MMMMMMM     OOOOOOOOOOOO     DDDDDDDDDDDDDDD       ///
 ///  B////////////////B   M//////M    M//////M   OO////////////OO   D//////////////DD     ///
 ///  B/////////////////B  M///////M  M///////M  OO//////////////OO  D///////////////DD    ///
@@ -1613,6 +1835,7 @@ const B = {
   array: <const T extends _.Borg>(itemSchema: T) => new BorgArray(itemSchema),
   object: <const T extends { [key: string]: _.Borg }>(shape: T) =>
     new BorgObject(shape),
+  union: <const T extends _.Borg[]>(...members: T) => new BorgUnion(members),
   model: makeBorg,
 };
 
@@ -1646,6 +1869,11 @@ declare module B {
     TShape extends { [key: string]: _.Borg } = { [key: string]: _.Borg },
   > = InstanceType<typeof BorgObject<TFlags, TShape>>;
 
+  export type Union<
+    TFlags extends _.Flags = _.Flags,
+    TMembers extends _.Borg = _.Borg,
+  > = BorgUnion<TFlags, TMembers>;
+
   export type Borg = _.Borg;
   export type Type<T extends _.Borg> = _.Type<T>;
   export type BsonType<T extends _.Borg> = _.BsonType<T>;
@@ -1657,7 +1885,9 @@ declare module B {
     | B.String
     | B.Number
     | B.Boolean
-    | B.Id;
+    | B.Id
+    | B.Union
+    | B.Borg;
 }
 
 export default B;

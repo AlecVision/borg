@@ -16,6 +16,10 @@ export type Meta = PrettyPrint<
     private: boolean;
   } & (
     | {
+        kind: "union";
+        borgMembers: B.AnyBorg;
+    }
+    | {
         kind: "object";
         keys: (string | undefined)[];
         requiredKeys: (string | undefined)[];
@@ -48,6 +52,14 @@ export type Meta = PrettyPrint<
       }
   )
 >;
+
+export type UnionMeta<
+  TFlags extends Flags,
+  TMembers extends Borg[][number],
+> = PrettyPrint<{
+  kind: "union";
+  borgMembers: TMembers;
+} & GetFlags<TFlags>>;
 
 export type ObjectMeta<
   TFlags extends Flags,
