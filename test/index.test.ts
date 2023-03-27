@@ -1,4 +1,4 @@
-import B from "src/index";
+import B from "src/mongodb";
 import { expect, it, describe } from "vitest";
 
 const string = B.string();
@@ -11,7 +11,7 @@ const obj1 = B.object({
   num: number.optional(),
   bool: boolean.optional(),
   id: oid.optional(),
-});
+})
 
 const arr1 = B.array(obj1);
 const strArr = B.array(string);

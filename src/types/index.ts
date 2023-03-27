@@ -1,8 +1,5 @@
-export * from "./BsonSchema";
 export * from "./Meta";
 export * from "./utils";
-export * from "./Borg";
-export type { ObjectIdLike } from "bson";
 
 /**
 FIXME: This is not correct. We want to be able to do this: `type A = ArrayToTuple<(1 | 2 | 3)[]> //--> [1, 2, 3]`

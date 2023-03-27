@@ -1,121 +1,98 @@
-import { ObjectId } from "bson";
-import {
-  Flags,
-  GetFlags,
-  MinMax,
-  Borg,
-  RequiredKeysArray,
-  PrettyPrint,
-} from ".";
-import B from "src";
+import _ from "./utils";
+import B from "../";
 
-export type Meta = PrettyPrint<
-  {
-    optional: boolean;
-    nullable: boolean;
-    private: boolean;
-  } & (
-    | {
-        kind: "object";
-        keys: (string | undefined)[];
-        requiredKeys: (string | undefined)[];
-        borgShape: { [key: string]: Borg };
-      }
-    | {
-        borgItems: Borg;
-        kind: "array";
-        maxItems: number | null;
-        minItems: number | null;
-      }
-    | {
-        kind: "string";
-        maxLength: number | null;
-        minLength: number | null;
-        pattern: string | undefined;
-        regex: RegExp | undefined;
-      }
-    | {
-        kind: "number";
-        max: number | null;
-        min: number | null;
-      }
-    | {
-        kind: "boolean";
-      }
-    | {
-        kind: "id";
-        format: "string" | "oid";
-      }
-  )
->;
+declare module Meta {
+  type ObjectMeta<
+    TFlags extends _.Flags,
+    TShape extends { [key: string]: B.Borg },
+  > = _.PrettyPrint<
+    {
+      kind: "object";
+      keys: Array<Extract<keyof TShape, string>>;
+      requiredKeys: _.RequiredKeysArray<TShape>;
+      borgShape: TShape;
+    } & _.GetFlags<TFlags>
+  >;
 
-export type ObjectMeta<
-  TFlags extends Flags,
-  TShape extends { [key: string]: Borg },
-> = PrettyPrint<{
-  kind: "object";
-  keys: Array<Extract<keyof TShape, string>>;
-  requiredKeys: RequiredKeysArray<TShape>;
-  borgShape: TShape;
-} & GetFlags<TFlags>>;
+  type ArrayMeta<
+    TFlags extends _.Flags,
+    TLength extends _.MinMax,
+    TItemBorg extends B.Borg,
+  > = _.PrettyPrint<
+    {
+      borgItems: TItemBorg;
+      kind: "array";
+      maxItems: TLength[1];
+      minItems: TLength[0];
+    } & _.GetFlags<TFlags>
+  >;
 
-export type ArrayMeta<
-  TFlags extends Flags,
-  TLength extends MinMax,
-  TItemBorg extends Borg,
-> = PrettyPrint<{
-  borgItems: TItemBorg;
-  kind: "array";
-  maxItems: TLength[1];
-  minItems: TLength[0];
-} & GetFlags<TFlags>>;
+  type StringMeta<
+    TFlags extends _.Flags,
+    TLength extends _.MinMax,
+    TPattern extends string,
+  > = _.PrettyPrint<
+    {
+      kind: "string";
+      maxLength: TLength[1];
+      minLength: TLength[0];
+      pattern: TPattern;
+      regex: TPattern extends ".*" ? undefined : RegExp;
+    } & _.GetFlags<TFlags>
+  >;
 
-export type StringMeta<
-  TFlags extends Flags,
-  TLength extends MinMax,
-  TPattern extends string,
-> = PrettyPrint<{
-  kind: "string";
-  maxLength: TLength[1];
-  minLength: TLength[0];
-  pattern: TPattern;
-  regex: TPattern extends ".*" ? undefined : RegExp;
-} & GetFlags<TFlags>>;
+  type NumberMeta<TFlags extends _.Flags, TRange extends _.MinMax> = _.PrettyPrint<
+    {
+      kind: "number";
+      max: TRange[1];
+      min: TRange[0];
+    } & _.GetFlags<TFlags>
+  >;
 
-export type NumberMeta<
-  TFlags extends Flags,
-  TRange extends MinMax,
-> = PrettyPrint<{
-  kind: "number";
-  max: TRange[1];
-  min: TRange[0];
-} & GetFlags<TFlags>>;
+  type BooleanMeta<TFlags extends _.Flags> = _.PrettyPrint<
+    {
+      kind: "boolean";
+    } & _.GetFlags<TFlags>
+  >;
+  /* 
 
-export type IdMeta<
-  TFlags extends Flags,
-  TFormat extends string | ObjectId,
-> = PrettyPrint<{
-  kind: "id";
-  format: TFormat extends ObjectId ? "oid" : "string";
-} & GetFlags<TFlags>>;
+  type GenericMeta<TExtension extends {[key: string]: any}[] = {[key: string]: any}[]> = _.PrettyPrint<
+    {
+      optional: boolean;
+      nullable: boolean;
+      private: boolean;
+    } & (
+      | {
+          kind: "object";
+          keys: (string | undefined)[];
+          requiredKeys: (string | undefined)[];
+          borgShape: { [key: string]: B.Borg };
+        }
+      | {
+          borgItems: B.Borg;
+          kind: "array";
+          maxItems: number | null;
+          minItems: number | null;
+        }
+      | {
+          kind: "string";
+          maxLength: number | null;
+          minLength: number | null;
+          pattern: string | undefined;
+          regex: RegExp | undefined;
+        }
+      | {
+          kind: "number";
+          max: number | null;
+          min: number | null;
+        }
+      | {
+          kind: "boolean";
+        }
+      | TExtension[number]
+    )
+  >;
+} */
+}
 
-export type BooleanMeta<TFlags extends Flags> = PrettyPrint<{
-  kind: "boolean";
-} & GetFlags<TFlags>>;
-
-export type MetaFromBorg<TBorg extends Borg> = TBorg extends B.Object<
-  infer TFlags,
-  infer TShape
->
-  ? ObjectMeta<TFlags, TShape>
-  : TBorg extends B.Array<infer TItemBorg, infer TFlags, infer TLength>
-  ? ArrayMeta<TItemBorg, TFlags, TLength>
-  : TBorg extends B.String<infer TFlags, infer TLength, infer TPattern>
-  ? StringMeta<TFlags, TLength, TPattern>
-  : TBorg extends B.Number<infer TFlags, infer TRange>
-  ? NumberMeta<TFlags, TRange>
-  : TBorg extends B.Id<infer TFlags, infer TFormat>
-  ? IdMeta<TFlags, TFormat>
-  : TBorg extends B.Boolean<infer TFlags>
-  ? BooleanMeta<TFlags>
-  : Meta
+export default Meta;
