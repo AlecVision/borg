@@ -1689,10 +1689,6 @@ export class BorgUnion<
     }
   }
 
-  is(input: unknown): input is ReturnType<this["parse"]> {
-    return this.try(input).ok;
-  }
-
   //TODO: Serialization should result in { __borgMeta: /* META */, data: /* DATA */ }
   serialize(input: B.Type<this>): _.Sanitized<B.Type<this>, TFlags> {
     if (input === undefined || input === null) return input as any;
