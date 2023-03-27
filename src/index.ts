@@ -163,7 +163,7 @@ class BorgObject<
     return result;
   }
 
-  try(input: unknown): _.TryResult<BorgObject<TFlags, TShape>> {
+  try(input: unknown): _.TryResult<_.Type<this>, this["meta"], _.Serialized<this>> {
     try {
       const value = this.parse(input) as any;
       return {
@@ -462,7 +462,7 @@ class BorgArray<
     return result;
   }
 
-  try(input: unknown): _.TryResult<BorgArray<TFlags, TLength, TItemSchema>> {
+  try(input: unknown): _.TryResult<_.Type<this>, this["meta"], _.Serialized<this>> {
     try {
       const value = this.parse(input) as any;
       return {
@@ -741,7 +741,7 @@ class BorgString<
     }
     return input as any;
   }
-  try(input: unknown): _.TryResult<BorgString<TFlags, TLength, TPattern>> {
+    try(input: unknown): _.TryResult<_.Type<this>, this["meta"], _.Serialized<this>> {
     try {
       const value = this.parse(input) as any;
       return {
@@ -875,7 +875,7 @@ class BorgString<
     TFlags, TLength, S extends null ? ".*" : S
   > {
     const clone = this.copy();
-    clone.#pattern = pattern;
+    clone.#pattern = pattern as any;
     return clone as any;
   }
 
@@ -990,7 +990,7 @@ class BorgNumber<
     return input as any;
   }
 
-  try(input: unknown): _.TryResult<BorgNumber<TFlags, TLength>> {
+    try(input: unknown): _.TryResult<_.Type<this>, this["meta"], _.Serialized<this>> {
     try {
       const value = this.parse(input) as any;
       return {
@@ -1202,7 +1202,7 @@ class BorgBoolean<
     return input as any;
   }
 
-  try(input: unknown): _.TryResult<BorgBoolean<TFlags>> {
+    try(input: unknown): _.TryResult<_.Type<this>, this["meta"], _.Serialized<this>> {
     try {
       const value = this.parse(input) as any;
       return {
@@ -1417,7 +1417,7 @@ class BorgId<
     );
   }
 
-  try(input: unknown): _.TryResult<BorgId<TFlags, TFormat>> {
+  try(input: unknown): _.TryResult<_.Type<this>, this["meta"], _.Serialized<this>> {
     try {
       const value = this.parse(input) as any;
       return {

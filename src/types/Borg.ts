@@ -1,5 +1,5 @@
 import { BorgError } from "src/errors";
-import { Meta, MetaFromBorg } from "./Meta";
+import { Meta } from "./Meta";
 
 /////////////////////////////////////////////////////////////////////////////////////////////
 ///                                                                                       ///
@@ -27,10 +27,10 @@ import { Meta, MetaFromBorg } from "./Meta";
 export abstract class Borg {
   abstract get meta(): Meta;
   abstract get bsonSchema(): any;
-  abstract copy<T extends Borg>(this: T): T;
+  abstract copy(): Borg;
   abstract parse(input: unknown): unknown;
-  abstract try<T extends Borg>(this: T, input: unknown): TryResult<T>;
-  abstract is<T extends Borg>(this: T, input: unknown): input is Type<T>;
+  abstract try(input: unknown): TryResult<unknown, Meta, unknown>;
+  abstract is(input: unknown): input is Type<this>;
   abstract serialize(input: any): any;
   abstract deserialize(input: any): any;
   abstract toBson(input: any): any;
@@ -78,15 +78,14 @@ export type Serialized<TBorg extends { serialize: (arg0: any) => any }> =
 export type Deserialized<TBorg extends { deserialize: (arg0: any) => any }> =
   ReturnType<TBorg["deserialize"]>;
 
-
-export type TryResult<TBorg> = TBorg extends infer B extends Borg?
-| {
-    ok: true;
-    value: Type<B>;
-    meta: MetaFromBorg<B>;
-    serialize: () => Serialized<B>
-  }
-| {
-    ok: false;
-    error: BorgError;
-  } : never
+export type TryResult<TValue, TMeta, TSerialized> =
+  | {
+      ok: true;
+      value: TValue;
+      meta: TMeta;
+      serialize: () => TSerialized;
+    }
+  | {
+      ok: false;
+      error: BorgError;
+    };
