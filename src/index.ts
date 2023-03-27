@@ -163,7 +163,9 @@ class BorgObject<
     return result;
   }
 
-  try(input: unknown): _.TryResult<_.Type<this>, this["meta"], _.Serialized<this>> {
+  try(
+    input: unknown,
+  ): _.TryResult<_.Type<this>, this["meta"], _.Serialized<this>> {
     try {
       const value = this.parse(input) as any;
       return {
@@ -178,8 +180,10 @@ class BorgObject<
         return {
           ok: false,
           error: new BorgError(
-            `OBJECT_ERROR(try): Unknown error parsing: \n\t${JSON.stringify(e)}`,
-          )
+            `OBJECT_ERROR(try): Unknown error parsing: \n\t${JSON.stringify(
+              e,
+            )}`,
+          ),
         } as any;
     }
   }
@@ -462,7 +466,9 @@ class BorgArray<
     return result;
   }
 
-  try(input: unknown): _.TryResult<_.Type<this>, this["meta"], _.Serialized<this>> {
+  try(
+    input: unknown,
+  ): _.TryResult<_.Type<this>, this["meta"], _.Serialized<this>> {
     try {
       const value = this.parse(input) as any;
       return {
@@ -478,7 +484,7 @@ class BorgArray<
           ok: false,
           error: new BorgError(
             `ARRAY_ERROR(try): Unknown error parsing: \n\t${JSON.stringify(e)}`,
-          )
+          ),
         } as any;
     }
   }
@@ -578,17 +584,17 @@ class BorgArray<
     return clone as any;
   }
 
-  minLength<const N extends number>(
-    length: N,
-  ): BorgArray<TFlags, [N, TLength[1]], TItemSchema> {
+  minLength<const Min extends number>(
+    length: Min,
+  ): BorgArray<TFlags, [Min, TLength[1]], TItemSchema> {
     const clone = this.copy();
     clone.#min = length;
     return clone as any;
   }
 
-  maxLength<const N extends number>(
-    length: N,
-  ): BorgArray<TFlags, [TLength[0], N], TItemSchema> {
+  maxLength<const Max extends number>(
+    length: Max,
+  ): BorgArray<TFlags, [TLength[0], Max], TItemSchema> {
     const clone = this.copy();
     clone.#max = length;
     return clone as any;
@@ -732,7 +738,7 @@ class BorgString<
         }, got ${input.length}`,
       );
     }
-    if (this.#pattern !== null && !new RegExp(this.#pattern).test(input)) {
+    if (this.#pattern !== null && !new RegExp(this.#pattern, "u").test(input)) {
       throw new BorgError(
         `STRING_ERROR: Expected string to match pattern ${
           this.#pattern
@@ -741,7 +747,9 @@ class BorgString<
     }
     return input as any;
   }
-    try(input: unknown): _.TryResult<_.Type<this>, this["meta"], _.Serialized<this>> {
+  try(
+    input: unknown,
+  ): _.TryResult<_.Type<this>, this["meta"], _.Serialized<this>> {
     try {
       const value = this.parse(input) as any;
       return {
@@ -756,8 +764,10 @@ class BorgString<
         return {
           ok: false,
           error: new BorgError(
-            `STRING_ERROR(try): Unknown error parsing: \n\t${JSON.stringify(e)}`,
-          )
+            `STRING_ERROR(try): Unknown error parsing: \n\t${JSON.stringify(
+              e,
+            )}`,
+          ),
         } as any;
     }
   }
@@ -833,17 +843,17 @@ class BorgString<
     return clone as any;
   }
 
-  minLength<const N extends number | null>(
-    length: N,
-  ): BorgString<TFlags, [N, TLength[1]], TPattern> {
+  minLength<const Min extends number | null>(
+    length: Min,
+  ): BorgString<TFlags, [Min, TLength[1]], TPattern> {
     const clone = this.copy();
     clone.#min = length;
     return clone as any;
   }
 
-  maxLength<const N extends number | null>(
-    length: N,
-  ): BorgString<TFlags, [TLength[0], N], TPattern> {
+  maxLength<const Max extends number | null>(
+    length: Max,
+  ): BorgString<TFlags, [TLength[0], Max], TPattern> {
     const clone = this.copy();
     clone.#max = length;
     return clone as any;
@@ -855,10 +865,7 @@ class BorgString<
   length<
     const Min extends number | null,
     const Max extends number | null = Min,
-  >(
-    minLength: Min,
-    maxLength?: Max,
-  ): BorgString<TFlags, [Min, Max], TPattern> {
+  >(minLength: Min, maxLength?: Max): BorgString<TFlags, [Min, Max], TPattern> {
     const clone = this.copy();
     clone.#min = minLength;
     clone.#max = maxLength === undefined ? minLength : maxLength;
@@ -871,9 +878,7 @@ class BorgString<
    */
   pattern<const S extends string | null>(
     pattern: S,
-  ): BorgString<
-    TFlags, TLength, S extends null ? ".*" : S
-  > {
+  ): BorgString<TFlags, TLength, S extends null ? ".*" : S> {
     const clone = this.copy();
     clone.#pattern = pattern as any;
     return clone as any;
@@ -906,15 +911,15 @@ class BorgString<
 
 class BorgNumber<
   const TFlags extends _.Flags = ["required", "notNull", "public"],
-  const TLength extends _.MinMax = [null, null],
+  const TRange extends _.MinMax = [null, null],
 > extends _.Borg {
   #flags = {
     optional: false,
     nullable: false,
     private: false,
   };
-  #min: TLength[0] = null;
-  #max: TLength[1] = null;
+  #min: TRange[0] = null;
+  #max: TRange[1] = null;
 
   constructor() {
     super();
@@ -928,7 +933,7 @@ class BorgNumber<
     return clone as any;
   }
 
-  get meta(): _.NumberMeta<TFlags, TLength> {
+  get meta(): _.NumberMeta<TFlags, TRange> {
     return Object.freeze({
       kind: "number",
       max: this.#max,
@@ -990,7 +995,9 @@ class BorgNumber<
     return input as any;
   }
 
-    try(input: unknown): _.TryResult<_.Type<this>, this["meta"], _.Serialized<this>> {
+  try(
+    input: unknown,
+  ): _.TryResult<_.Type<this>, this["meta"], _.Serialized<this>> {
     try {
       const value = this.parse(input) as any;
       return {
@@ -1005,8 +1012,10 @@ class BorgNumber<
         return {
           ok: false,
           error: new BorgError(
-            `NUMBER_ERROR(try): Unknown error parsing: \n\t${JSON.stringify(e)}`,
-          )
+            `NUMBER_ERROR(try): Unknown error parsing: \n\t${JSON.stringify(
+              e,
+            )}`,
+          ),
         } as any;
     }
   }
@@ -1032,51 +1041,51 @@ class BorgNumber<
     return (input && "valueOf" in input ? input.valueOf() : input) as any;
   }
 
-  optional(): BorgNumber<_.SetOptional<TFlags>, TLength> {
+  optional(): BorgNumber<_.SetOptional<TFlags>, TRange> {
     const clone = this.copy();
     clone.#flags.optional = true;
     return clone as any;
   }
 
-  nullable(): BorgNumber<_.SetNullable<TFlags>, TLength> {
+  nullable(): BorgNumber<_.SetNullable<TFlags>, TRange> {
     const clone = this.copy();
     clone.#flags.nullable = true;
     return clone as any;
   }
 
-  nullish(): BorgNumber<_.SetNullish<TFlags>, TLength> {
+  nullish(): BorgNumber<_.SetNullish<TFlags>, TRange> {
     const clone = this.copy();
     clone.#flags.optional = true;
     clone.#flags.nullable = true;
     return clone as any;
   }
 
-  required(): BorgNumber<_.SetRequired<TFlags>, TLength> {
+  required(): BorgNumber<_.SetRequired<TFlags>, TRange> {
     const clone = this.copy();
     clone.#flags.optional = false;
     return clone as any;
   }
 
-  notNull(): BorgNumber<_.SetNotNull<TFlags>, TLength> {
+  notNull(): BorgNumber<_.SetNotNull<TFlags>, TRange> {
     const clone = this.copy();
     clone.#flags.nullable = false;
     return clone as any;
   }
 
-  notNullish(): BorgNumber<_.SetNotNullish<TFlags>, TLength> {
+  notNullish(): BorgNumber<_.SetNotNullish<TFlags>, TRange> {
     const clone = this.copy();
     clone.#flags.optional = false;
     clone.#flags.nullable = false;
     return clone as any;
   }
 
-  private(): BorgNumber<_.SetPrivate<TFlags>, TLength> {
+  private(): BorgNumber<_.SetPrivate<TFlags>, TRange> {
     const clone = this.copy();
     clone.#flags.private = true;
     return clone as any;
   }
 
-  public(): BorgNumber<_.SetPublic<TFlags>, TLength> {
+  public(): BorgNumber<_.SetPublic<TFlags>, TRange> {
     const clone = this.copy();
     clone.#flags.private = false;
     return clone as any;
@@ -1088,15 +1097,15 @@ class BorgNumber<
   */
   min<const Min extends number | null>(
     min: Min,
-  ): BorgNumber<TFlags, [Min, TLength[1]]> {
+  ): BorgNumber<TFlags, [Min, TRange[1]]> {
     const clone = this.copy();
     clone.#min = min;
     return clone as any;
   }
 
   max<const Max extends number | null>(
-    max: Max
-  ): BorgNumber<TFlags, [TLength[0], Max]> {
+    max: Max,
+  ): BorgNumber<TFlags, [TRange[0], Max]> {
     const clone = this.copy();
     clone.#max = max;
     return clone as any;
@@ -1106,7 +1115,7 @@ class BorgNumber<
    */
   range<const Min extends number | null, const Max extends number | null>(
     min: Min,
-    max: Max
+    max: Max,
   ): BorgNumber<TFlags, [Min, Max]> {
     const clone = this.copy();
     clone.#min = min;
@@ -1202,7 +1211,9 @@ class BorgBoolean<
     return input as any;
   }
 
-    try(input: unknown): _.TryResult<_.Type<this>, this["meta"], _.Serialized<this>> {
+  try(
+    input: unknown,
+  ): _.TryResult<_.Type<this>, this["meta"], _.Serialized<this>> {
     try {
       const value = this.parse(input) as any;
       return {
@@ -1217,10 +1228,12 @@ class BorgBoolean<
         return {
           ok: false,
           error: new BorgError(
-            `BOOLEAN_ERROR(try): Unknown error parsing: \n\t${JSON.stringify(e)}`,
-          )
+            `BOOLEAN_ERROR(try): Unknown error parsing: \n\t${JSON.stringify(
+              e,
+            )}`,
+          ),
         } as any;
-      }
+    }
   }
 
   serialize(input: B.Type<this>): _.Sanitized<B.Type<this>, TFlags> {
@@ -1417,7 +1430,9 @@ class BorgId<
     );
   }
 
-  try(input: unknown): _.TryResult<_.Type<this>, this["meta"], _.Serialized<this>> {
+  try(
+    input: unknown,
+  ): _.TryResult<_.Type<this>, this["meta"], _.Serialized<this>> {
     try {
       const value = this.parse(input) as any;
       return {
@@ -1433,7 +1448,7 @@ class BorgId<
           ok: false,
           error: new BorgError(
             `ID_ERROR(try): Unknown error parsing: \n\t${JSON.stringify(e)}`,
-          )
+          ),
         } as any;
     }
   }
