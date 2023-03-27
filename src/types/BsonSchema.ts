@@ -1,8 +1,9 @@
 import { ObjectId } from "bson";
 import { Flags, MinMax, Borg, Meta, PrettyPrint, ObjectMeta, ArrayMeta, BooleanMeta, IdMeta, NumberMeta, StringMeta } from ".";
+
 export type BsonSchema<TMeta extends Meta> = PrettyPrint<
-  TMeta extends ObjectMeta<infer TFlags extends Flags, infer _ extends {[key in infer TKeys]: infer TBorg extends Borg}>
-    ? ObjectBsonSchema<ObjectMeta<TFlags, {[key in TKeys]: TBorg}>>
+  TMeta extends ObjectMeta<infer TFlags extends Flags, infer TShape extends {[k in infer _k]: infer _b extends Borg}>
+    ? ObjectBsonSchema<ObjectMeta<TFlags, TShape>>
     : TMeta extends ArrayMeta<infer TFlags extends Flags, infer TMinMax extends MinMax, infer TItems>
     ? ArrayBsonSchema<ArrayMeta<TFlags, TMinMax, TItems>>
     : TMeta extends IdMeta<infer TFlags extends Flags, infer TFormat extends string | ObjectId>
