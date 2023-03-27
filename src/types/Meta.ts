@@ -16,6 +16,10 @@ export type Meta = PrettyPrint<
     private: boolean;
   } & (
     | {
+        kind: "union";
+        borgMembers: Borg[];
+      }
+    | {
         kind: "object";
         keys: (string | undefined)[];
         requiredKeys: (string | undefined)[];
@@ -47,6 +51,16 @@ export type Meta = PrettyPrint<
         format: "string" | "oid";
       }
   )
+>;
+
+export type UnionMeta<
+  TFlags extends Flags,
+  TBorgMembers extends Borg[],
+> = PrettyPrint<
+  {
+    kind: "union";
+    borgMembers: TBorgMembers;
+  } & GetFlags<TFlags>
 >;
 
 export type ObjectMeta<
@@ -108,8 +122,8 @@ export type MetaFromBorg<TBorg extends Borg> = TBorg extends B.Object<
   infer TShape
 >
   ? ObjectMeta<TFlags, TShape>
-  : TBorg extends B.Array<infer TItemBorg, infer TFlags, infer TLength>
-  ? ArrayMeta<TItemBorg, TFlags, TLength>
+  : TBorg extends B.Array<infer TFlags, infer TLength, infer TItems>
+  ? ArrayMeta<TFlags, TLength, TItems>
   : TBorg extends B.String<infer TFlags, infer TLength, infer TPattern>
   ? StringMeta<TFlags, TLength, TPattern>
   : TBorg extends B.Number<infer TFlags, infer TRange>
