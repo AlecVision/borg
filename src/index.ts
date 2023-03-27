@@ -163,7 +163,9 @@ class BorgObject<
     return result;
   }
 
-  try(input: unknown): _.TryResult<_.Type<this>, this["meta"], _.Serialized<this>> {
+  try(
+    input: unknown,
+  ): _.TryResult<_.Type<this>, this["meta"], _.Serialized<this>> {
     try {
       const value = this.parse(input) as any;
       return {
@@ -210,6 +212,7 @@ class BorgObject<
     }
     return result;
   }
+  //TODO: Fix deserialization & deserialization implementations
 
   deserialize(
     input: B.Serialized<this>,
@@ -231,7 +234,11 @@ class BorgObject<
     return result;
   }
   //TODO: Should we be treating 'undefined' in any special way when converting to BSON?
-  toBson<const TInput extends Partial<B.Type<this>> = B.Type<this>>(
+  toBson<
+    const TInput extends Partial<
+      _.Parsed<{ [k in keyof TShape]: B.Type<TShape[k]> }, TFlags>
+    > = Partial<_.Parsed<{ [k in keyof TShape]: B.Type<TShape[k]> }, TFlags>>,
+  >(
     input: TInput,
   ): {
     [k in keyof TShape as keyof TInput]: k extends keyof TInput
@@ -257,7 +264,9 @@ class BorgObject<
     return result;
   }
 
-  fromBson(input: B.BsonType<this>): B.Type<this> {
+  fromBson(
+    input: B.BsonType<BorgObject<TFlags, TShape>>,
+  ): _.Parsed<{ [k in keyof TShape]: B.Type<TShape[k]> }, TFlags> {
     if (input === null || input === undefined) return input as any;
     const result = {} as any;
     for (const key in this.#shape) {
@@ -464,7 +473,9 @@ class BorgArray<
     return result;
   }
 
-  try(input: unknown): _.TryResult<_.Type<this>, this["meta"], _.Serialized<this>> {
+  try(
+    input: unknown,
+  ): _.TryResult<_.Type<this>, this["meta"], _.Serialized<this>> {
     try {
       const value = this.parse(input) as any;
       return {
@@ -512,7 +523,9 @@ class BorgArray<
     return result;
   }
 
-  toBson(input: B.Type<this>): Array<B.BsonType<TItemSchema>> {
+  toBson(
+    input: _.Parsed<Array<B.Type<TItemSchema>>, TFlags>,
+  ): Array<B.BsonType<TItemSchema>> {
     if (input === null || input === undefined) return input as any;
     const result = new Array(input.length) as any;
     for (let i = 0; i < input.length; i++) {
@@ -521,7 +534,9 @@ class BorgArray<
     return result;
   }
 
-  fromBson(input: B.BsonType<this>): B.Type<this> {
+  fromBson(
+    input: B.BsonType<BorgArray<TFlags, TLength, TItemSchema>>,
+  ): _.Parsed<Array<B.Type<TItemSchema>>, TFlags> {
     if (input === null || input === undefined) return input as any;
     const result = new Array(input.length) as any;
     for (let i = 0; i < input.length; i++) {
@@ -743,7 +758,9 @@ class BorgString<
     }
     return input as any;
   }
-    try(input: unknown): _.TryResult<_.Type<this>, this["meta"], _.Serialized<this>> {
+  try(
+    input: unknown,
+  ): _.TryResult<_.Type<this>, this["meta"], _.Serialized<this>> {
     try {
       const value = this.parse(input) as any;
       return {
@@ -779,11 +796,11 @@ class BorgString<
     return input as any;
   }
 
-  toBson(input: B.Type<this>) {
+  toBson(input: _.Parsed<string, TFlags>) {
     return input;
   }
 
-  fromBson(input: B.BsonType<this>) {
+  fromBson(input: B.BsonType<BorgString<TFlags, TLength, TPattern>>) {
     return input;
   }
 
@@ -859,10 +876,7 @@ class BorgString<
   length<
     const Min extends number | null,
     const Max extends number | null = Min,
-  >(
-    minLength: Min,
-    maxLength?: Max,
-  ): BorgString<TFlags, [Min, Max], TPattern> {
+  >(minLength: Min, maxLength?: Max): BorgString<TFlags, [Min, Max], TPattern> {
     const clone = this.copy();
     clone.#min = minLength;
     clone.#max = maxLength === undefined ? minLength : maxLength;
@@ -875,9 +889,7 @@ class BorgString<
    */
   pattern<const S extends string | null>(
     pattern: S,
-  ): BorgString<
-    TFlags, TLength, S extends null ? ".*" : S
-  > {
+  ): BorgString<TFlags, TLength, S extends null ? ".*" : S> {
     const clone = this.copy();
     clone.#pattern = pattern as any;
     return clone as any;
@@ -910,15 +922,15 @@ class BorgString<
 
 class BorgNumber<
   const TFlags extends _.Flags = ["required", "notNull", "public"],
-  const TLength extends _.MinMax = [null, null],
+  const TRange extends _.MinMax = [null, null],
 > extends _.Borg {
   #flags = {
     optional: false,
     nullable: false,
     private: false,
   };
-  #min: TLength[0] = null;
-  #max: TLength[1] = null;
+  #min: TRange[0] = null;
+  #max: TRange[1] = null;
 
   constructor() {
     super();
@@ -932,7 +944,7 @@ class BorgNumber<
     return clone as any;
   }
 
-  get meta(): _.NumberMeta<TFlags, TLength> {
+  get meta(): _.NumberMeta<TFlags, TRange> {
     return Object.freeze({
       kind: "number",
       max: this.#max,
@@ -994,7 +1006,9 @@ class BorgNumber<
     return input as any;
   }
 
-    try(input: unknown): _.TryResult<_.Type<this>, this["meta"], _.Serialized<this>> {
+  try(
+    input: unknown,
+  ): _.TryResult<_.Type<this>, this["meta"], _.Serialized<this>> {
     try {
       const value = this.parse(input) as any;
       return {
@@ -1030,59 +1044,61 @@ class BorgNumber<
     return input as any;
   }
 
-  toBson(input: B.Type<this>): _.Parsed<Double, TFlags> {
+  toBson(input: _.Parsed<number, TFlags>): _.Parsed<Double, TFlags> {
     return typeof input === "number" ? new Double(input) : (input as any);
   }
 
-  fromBson(input: B.BsonType<this>): B.Type<this> {
+  fromBson(
+    input: B.BsonType<BorgNumber<TFlags, TRange>>,
+  ): _.Parsed<number, TFlags> {
     return (input && "valueOf" in input ? input.valueOf() : input) as any;
   }
 
-  optional(): BorgNumber<_.SetOptional<TFlags>, TLength> {
+  optional(): BorgNumber<_.SetOptional<TFlags>, TRange> {
     const clone = this.copy();
     clone.#flags.optional = true;
     return clone as any;
   }
 
-  nullable(): BorgNumber<_.SetNullable<TFlags>, TLength> {
+  nullable(): BorgNumber<_.SetNullable<TFlags>, TRange> {
     const clone = this.copy();
     clone.#flags.nullable = true;
     return clone as any;
   }
 
-  nullish(): BorgNumber<_.SetNullish<TFlags>, TLength> {
+  nullish(): BorgNumber<_.SetNullish<TFlags>, TRange> {
     const clone = this.copy();
     clone.#flags.optional = true;
     clone.#flags.nullable = true;
     return clone as any;
   }
 
-  required(): BorgNumber<_.SetRequired<TFlags>, TLength> {
+  required(): BorgNumber<_.SetRequired<TFlags>, TRange> {
     const clone = this.copy();
     clone.#flags.optional = false;
     return clone as any;
   }
 
-  notNull(): BorgNumber<_.SetNotNull<TFlags>, TLength> {
+  notNull(): BorgNumber<_.SetNotNull<TFlags>, TRange> {
     const clone = this.copy();
     clone.#flags.nullable = false;
     return clone as any;
   }
 
-  notNullish(): BorgNumber<_.SetNotNullish<TFlags>, TLength> {
+  notNullish(): BorgNumber<_.SetNotNullish<TFlags>, TRange> {
     const clone = this.copy();
     clone.#flags.optional = false;
     clone.#flags.nullable = false;
     return clone as any;
   }
 
-  private(): BorgNumber<_.SetPrivate<TFlags>, TLength> {
+  private(): BorgNumber<_.SetPrivate<TFlags>, TRange> {
     const clone = this.copy();
     clone.#flags.private = true;
     return clone as any;
   }
 
-  public(): BorgNumber<_.SetPublic<TFlags>, TLength> {
+  public(): BorgNumber<_.SetPublic<TFlags>, TRange> {
     const clone = this.copy();
     clone.#flags.private = false;
     return clone as any;
@@ -1094,15 +1110,15 @@ class BorgNumber<
   */
   min<const Min extends number | null>(
     min: Min,
-  ): BorgNumber<TFlags, [Min, TLength[1]]> {
+  ): BorgNumber<TFlags, [Min, TRange[1]]> {
     const clone = this.copy();
     clone.#min = min;
     return clone as any;
   }
 
   max<const Max extends number | null>(
-    max: Max
-  ): BorgNumber<TFlags, [TLength[0], Max]> {
+    max: Max,
+  ): BorgNumber<TFlags, [TRange[0], Max]> {
     const clone = this.copy();
     clone.#max = max;
     return clone as any;
@@ -1112,7 +1128,7 @@ class BorgNumber<
    */
   range<const Min extends number | null, const Max extends number | null>(
     min: Min,
-    max: Max
+    max: Max,
   ): BorgNumber<TFlags, [Min, Max]> {
     const clone = this.copy();
     clone.#min = min;
@@ -1208,7 +1224,9 @@ class BorgBoolean<
     return input as any;
   }
 
-    try(input: unknown): _.TryResult<_.Type<this>, this["meta"], _.Serialized<this>> {
+  try(
+    input: unknown,
+  ): _.TryResult<_.Type<this>, this["meta"], _.Serialized<this>> {
     try {
       const value = this.parse(input) as any;
       return {
@@ -1244,11 +1262,11 @@ class BorgBoolean<
     return input as any;
   }
 
-  toBson(input: B.Type<this>): _.Parsed<boolean, TFlags> {
+  toBson(input: _.Parsed<boolean, TFlags>): _.Parsed<boolean, TFlags> {
     return input as any;
   }
 
-  fromBson(input: B.BsonType<this>): B.Type<this> {
+  fromBson(input: B.BsonType<BorgBoolean<TFlags>>): _.Parsed<boolean, TFlags> {
     return input;
   }
 
@@ -1425,7 +1443,9 @@ class BorgId<
     );
   }
 
-  try(input: unknown): _.TryResult<_.Type<this>, this["meta"], _.Serialized<this>> {
+  try(
+    input: unknown,
+  ): _.TryResult<_.Type<this>, this["meta"], _.Serialized<this>> {
     try {
       const value = this.parse(input) as any;
       return {
@@ -1461,13 +1481,15 @@ class BorgId<
     return ObjectId.createFromHexString(input) as any;
   }
 
-  toBson(input: B.Type<this>): _.Parsed<ObjectId, TFlags> {
+  toBson(input: _.Parsed<TFormat, TFlags>): _.Parsed<ObjectId, TFlags> {
     if (input === undefined || input === null) return input as any;
     if (input instanceof ObjectId) return input as any;
     return ObjectId.createFromHexString(input) as any;
   }
 
-  fromBson(input: B.BsonType<this>): B.Type<this> {
+  fromBson(
+    input: B.BsonType<BorgId<TFlags, TFormat>>,
+  ): _.Parsed<TFormat, TFlags> {
     if (input === undefined || input === null) return input as any;
     if (!this.#format) return input as any;
     return input.toHexString() as any;
@@ -1559,19 +1581,26 @@ class BorgId<
 /////////////////////////////////////////////////////////////////////////////////////////////
 
 export class BorgUnion<
-  const TFlags extends _.Flags = _.Flags,
-  const TMembers extends _.Borg = _.Borg,
+  const TFlags extends _.Flags = ["required", "notNull", "public"],
+  const TMembers extends _.Borg[] = _.Borg[],
 > extends _.Borg {
+  #borgMembers: TMembers;
   #flags = {
     optional: false,
     nullable: false,
     private: false,
   };
-  #borgMembers: TMembers[];
 
-  constructor(memberSchemas: TMembers[]) {
+  constructor(members: TMembers) {
     super();
-    this.#borgMembers = memberSchemas;
+    this.#borgMembers = Object.freeze(members.map(m => m.copy())) as any;
+  }
+
+  static #clone<const TBorg extends BorgUnion<any, any[]>>(borg: TBorg) {
+    const newMembers = borg.#borgMembers.map(m => m.copy()) as any;
+    const clone = new BorgUnion(newMembers);
+    clone.#flags = { ...borg.#flags };
+    return clone as any;
   }
 
   get meta(): _.UnionMeta<TFlags, TMembers> {
@@ -1586,17 +1615,15 @@ export class BorgUnion<
     return _.getBsonSchema(this.meta);
   }
 
-  static #clone<const TBorg extends B.Union<any, any>>(borg: TBorg): TBorg {
-    const clone = new BorgUnion(borg.#borgMembers.map(m => m.copy()));
-    clone.#flags = { ...borg.#flags };
-    return clone as any;
+  is(input: unknown): input is ReturnType<this["parse"]> {
+    return this.try(input).ok;
   }
 
   copy(): this {
     return BorgUnion.#clone(this);
   }
 
-  parse(input: unknown): _.Parsed<_.Type<TMembers>[], TFlags> {
+  parse(input: unknown): _.Parsed<B.Type<TMembers[number]>[][number], TFlags> {
     if (input === undefined) {
       if (this.#flags.optional) return void 0 as any;
       throw new BorgError(
@@ -1616,7 +1643,7 @@ export class BorgUnion<
     const errors = [] as { ok: false; error: BorgError }[];
     for (const schema of this.#borgMembers) {
       const result = schema.try(input);
-      if (result.ok) return result.value;
+      if (result.ok) return result.value as any;
       errors.push(result);
     }
     throw new BorgError(
@@ -1639,7 +1666,9 @@ export class BorgUnion<
     );
   }
 
-  try(input: unknown): _.TryResult<this> {
+  try(
+    input: unknown,
+  ): _.TryResult<_.Type<this>, this["meta"], _.Serialized<this>> {
     try {
       const value = this.parse(input) as any;
       return {
@@ -1674,29 +1703,23 @@ export class BorgUnion<
 
   deserialize(input: B.Serialized<this>): _.Sanitized<_.Type<this>, TFlags> {
     if (input === undefined || input === null) return input as any;
-    if (
-      typeof input === "string" ||
-      typeof input === "number" ||
-      typeof input === "boolean"
-    ) {
-      return input as any;
-    }
-    if (typeof input !== "object") {
-      
-    }
+    for (const type of this.#borgMembers)
+      if (type.is(input)) return type.deserialize(input) as any;
+    throw new BorgError(`DESERIALIZATION_ERROR: Invalid input`);
   }
 
   toBson(input: any): _.Parsed<any, TFlags> {
     if (input === undefined || input === null) return input as any;
-    for (const type of this.#borgMembers) {
-      try {
-        return type.toBson(input);
-      } catch (err) {
-        if (err instanceof BorgError) continue;
-        throw err;
-      }
-    }
-    throw new BorgError(`UNION_ERROR: invalid type`);
+    for (const type of this.#borgMembers)
+      if (type.is(input)) return type.toBson(input) as any;
+    throw new BorgError(`TO_BSON_ERROR: Invalid input`);
+  }
+
+  fromBson(input: any): _.Parsed<any, TFlags> {
+    if (input === undefined || input === null) return input as any;
+    for (const type of this.#borgMembers)
+      if (type.is(input)) return type.fromBson(input) as any;
+    throw new BorgError(`FROM_BSON_ERROR: Invalid input`);
   }
 
   optional(): BorgUnion<_.SetOptional<TFlags>, TMembers> {
@@ -1871,7 +1894,7 @@ declare module B {
 
   export type Union<
     TFlags extends _.Flags = _.Flags,
-    TMembers extends _.Borg = _.Borg,
+    TMembers extends _.Borg[] = _.Borg[],
   > = BorgUnion<TFlags, TMembers>;
 
   export type Borg = _.Borg;

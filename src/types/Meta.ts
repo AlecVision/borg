@@ -17,8 +17,8 @@ export type Meta = PrettyPrint<
   } & (
     | {
         kind: "union";
-        borgMembers: B.AnyBorg;
-    }
+        borgMembers: Borg[];
+      }
     | {
         kind: "object";
         keys: (string | undefined)[];
@@ -55,11 +55,13 @@ export type Meta = PrettyPrint<
 
 export type UnionMeta<
   TFlags extends Flags,
-  TMembers extends Borg[][number],
-> = PrettyPrint<{
-  kind: "union";
-  borgMembers: TMembers;
-} & GetFlags<TFlags>>;
+  TBorgMembers extends Borg[],
+> = PrettyPrint<
+  {
+    kind: "union";
+    borgMembers: TBorgMembers;
+  } & GetFlags<TFlags>
+>;
 
 export type ObjectMeta<
   TFlags extends Flags,
@@ -120,8 +122,8 @@ export type MetaFromBorg<TBorg extends Borg> = TBorg extends B.Object<
   infer TShape
 >
   ? ObjectMeta<TFlags, TShape>
-  : TBorg extends B.Array<infer TItemBorg, infer TFlags, infer TLength>
-  ? ArrayMeta<TItemBorg, TFlags, TLength>
+  : TBorg extends B.Array<infer TFlags, infer TLength, infer TItems>
+  ? ArrayMeta<TFlags, TLength, TItems>
   : TBorg extends B.String<infer TFlags, infer TLength, infer TPattern>
   ? StringMeta<TFlags, TLength, TPattern>
   : TBorg extends B.Number<infer TFlags, infer TRange>
