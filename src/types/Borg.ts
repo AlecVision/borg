@@ -27,22 +27,22 @@ import { Meta, MetaFromBorg } from "./Meta";
 export abstract class Borg {
   abstract get meta(): Meta;
   abstract get bsonSchema(): any;
-  abstract copy(): Borg;
-  abstract parse(input: unknown): any;
-  abstract try(input: unknown): TryResult<any>
-  abstract is(input: unknown): input is Type<this>;
+  abstract copy<T extends Borg>(this: T): T;
+  abstract parse(input: unknown): unknown;
+  abstract try<T extends Borg>(this: T, input: unknown): TryResult<T>;
+  abstract is<T extends Borg>(this: T, input: unknown): input is Type<T>;
   abstract serialize(input: any): any;
   abstract deserialize(input: any): any;
   abstract toBson(input: any): any;
   abstract fromBson(input: any): any;
-  abstract private(): any;
-  abstract public(): any;
-  abstract optional(): any;
-  abstract nullable(): any;
-  abstract nullish(): any;
-  abstract required(): any;
-  abstract notNull(): any;
-  abstract notNullish(): any;
+  abstract private(): Borg;
+  abstract public(): Borg;
+  abstract optional(): Borg;
+  abstract nullable(): Borg;
+  abstract nullish(): Borg;
+  abstract required(): Borg;
+  abstract notNull(): Borg;
+  abstract notNullish(): Borg;
   /* c8 ignore next */
 }
 

@@ -602,7 +602,7 @@ type A2 = typeof A //--> Array<string & { length: 1 }> & { length: 3 }
 --OR--
 type A2 = typeof A //--> [string & { length: 1 }, string & { length: 1 }, string & { length: 1 }]
 */
-  length<const N extends number>(
+  length<const N extends number | null>(
     length: N,
   ): BorgArray<TFlags, [N, N], TItemSchema>;
   length<const Min extends number, const Max extends number = Min>(
@@ -611,7 +611,7 @@ type A2 = typeof A //--> [string & { length: 1 }, string & { length: 1 }, string
   ): BorgArray<TFlags, [Min, Max], TItemSchema> {
     const clone = this.copy();
     clone.#min = minLength;
-    clone.#max = maxLength ?? minLength;
+    clone.#max = maxLength === undefined ? minLength : maxLength;
     return clone as any;
   }
 
@@ -652,7 +652,7 @@ class BorgString<
   };
   #min: TLength[0] = null;
   #max: TLength[1] = null;
-  #regex: RegExp | undefined = undefined;
+  #pattern: TPattern | null = null;
 
   constructor() {
     super();
@@ -665,7 +665,7 @@ class BorgString<
     clone.#flags = { ...borg.#flags };
     clone.#min = borg.#min;
     clone.#max = borg.#max;
-    clone.#regex = borg.#regex ? new RegExp(borg.#regex) : undefined;
+    clone.#pattern = borg.#pattern;
     return clone as any;
   }
 
@@ -675,8 +675,10 @@ class BorgString<
       kind: "string",
       maxLength: this.#max,
       minLength: this.#min,
-      pattern: this.#regex?.source,
-      regex: this.#regex ? Object.freeze(new RegExp(this.#regex)) : undefined,
+      pattern: this.#pattern,
+      regex: this.#pattern
+        ? Object.freeze(new RegExp(this.#pattern))
+        : undefined,
     }) as any;
   }
 
@@ -730,10 +732,10 @@ class BorgString<
         }, got ${input.length}`,
       );
     }
-    if (this.#regex !== undefined && !this.#regex.test(input)) {
+    if (this.#pattern !== null && !new RegExp(this.#pattern).test(input)) {
       throw new BorgError(
         `STRING_ERROR: Expected string to match pattern ${
-          this.#regex.source
+          this.#pattern
         }, got ${input}`,
       );
     }
@@ -831,7 +833,7 @@ class BorgString<
     return clone as any;
   }
 
-  minLength<const N extends number>(
+  minLength<const N extends number | null>(
     length: N,
   ): BorgString<TFlags, [N, TLength[1]], TPattern> {
     const clone = this.copy();
@@ -839,7 +841,7 @@ class BorgString<
     return clone as any;
   }
 
-  maxLength<const N extends number>(
+  maxLength<const N extends number | null>(
     length: N,
   ): BorgString<TFlags, [TLength[0], N], TPattern> {
     const clone = this.copy();
@@ -847,14 +849,19 @@ class BorgString<
     return clone as any;
   }
 
-  length<const N extends number>(length: N): BorgString<TFlags, [N, N]>;
-  length<const Min extends number, const Max extends number = Min>(
+  length<const N extends number | null>(
+    length: N,
+  ): BorgString<TFlags, [N, N], TPattern>;
+  length<
+    const Min extends number | null,
+    const Max extends number | null = Min,
+  >(
     minLength: Min,
     maxLength?: Max,
-  ): BorgString<TFlags, [Min, Max]> {
+  ): BorgString<TFlags, [Min, Max], TPattern> {
     const clone = this.copy();
     clone.#min = minLength;
-    clone.#max = maxLength ?? minLength;
+    clone.#max = maxLength === undefined ? minLength : maxLength;
     return clone as any;
   }
 
@@ -862,9 +869,13 @@ class BorgString<
    * @IMPORTANT RegExp flags are not supported, except for the "u" flag which is always set.
    * @param pattern a string that will be used as the source for a new RegExp
    */
-  pattern<const S extends string>(pattern: S): BorgString<TFlags, TLength, S> {
+  pattern<const S extends string | null>(
+    pattern: S,
+  ): BorgString<
+    TFlags, TLength, S extends null ? ".*" : S
+  > {
     const clone = this.copy();
-    clone.#regex = new RegExp(pattern, "u");
+    clone.#pattern = pattern;
     return clone as any;
   }
 
@@ -1075,13 +1086,17 @@ class BorgNumber<
   remove max. If min is set, and max is then set to a value less than
   min, remove min.
   */
-  min<const N extends number>(min: N): BorgNumber<TFlags, [N, TLength[1]]> {
+  min<const Min extends number | null>(
+    min: Min,
+  ): BorgNumber<TFlags, [Min, TLength[1]]> {
     const clone = this.copy();
     clone.#min = min;
     return clone as any;
   }
 
-  max<const N extends number>(max: N): BorgNumber<TFlags, [TLength[0], N]> {
+  max<const Max extends number | null>(
+    max: Max
+  ): BorgNumber<TFlags, [TLength[0], Max]> {
     const clone = this.copy();
     clone.#max = max;
     return clone as any;
@@ -1089,10 +1104,10 @@ class BorgNumber<
   /**
    * Inclusive range
    */
-  range<const N extends number, const M extends number>(
-    min: N,
-    max: M,
-  ): BorgNumber<TFlags, [N, M]> {
+  range<const Min extends number | null, const Max extends number | null>(
+    min: Min,
+    max: Max
+  ): BorgNumber<TFlags, [Min, Max]> {
     const clone = this.copy();
     clone.#min = min;
     clone.#max = max;
@@ -1607,29 +1622,29 @@ declare module B {
   export type Id<
     TFlags extends _.Flags = _.Flags,
     TFormat extends "string" | "oid" = "string" | "oid",
-  > = BorgId<TFlags, TFormat>;
+  > = InstanceType<typeof BorgId<TFlags, TFormat>>;
 
   export type Number<
     TFlags extends _.Flags = _.Flags,
     TLength extends _.MinMax = _.MinMax,
-  > = BorgNumber<TFlags, TLength>;
+  > = InstanceType<typeof BorgNumber<TFlags, TLength>>;
 
   export type String<
     TFlags extends _.Flags = _.Flags,
     TLength extends _.MinMax = _.MinMax,
     TPattern extends string = string,
-  > = BorgString<TFlags, TLength, TPattern>;
+  > = InstanceType<typeof BorgString<TFlags, TLength, TPattern>>;
 
   export type Array<
     TFlags extends _.Flags = _.Flags,
     TLength extends _.MinMax = _.MinMax,
     TItems extends _.Borg = _.Borg,
-  > = BorgArray<TFlags, TLength, TItems>;
+  > = InstanceType<typeof BorgArray<TFlags, TLength, TItems>>;
 
   export type Object<
     TFlags extends _.Flags = _.Flags,
     TShape extends { [key: string]: _.Borg } = { [key: string]: _.Borg },
-  > = BorgObject<TFlags, TShape>;
+  > = InstanceType<typeof BorgObject<TFlags, TShape>>;
 
   export type Borg = _.Borg;
   export type Type<T extends _.Borg> = _.Type<T>;
