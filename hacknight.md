@@ -1,7 +1,7 @@
 # TWD Hack Night - GitHub Actions
 
-https://fullstackopen.com/en/part11/getting_started_with_git_hub_actions#getting-started-with-workflows
-
+[Intro to GH Actions](https://fullstackopen.com/en/part11/getting_started_with_git_hub_actions#getting-started-with-workflows)
+[`commit-and-tag-version` Docs](https://github.com/absolute-version/commit-and-tag-version)
 ## Stage 1 - Create a "Hello World" workflow
 - [ ] Workflow should run when triggered manually
 - [ ] Workflow should output "hello world" to the console when run
@@ -19,6 +19,7 @@ https://fullstackopen.com/en/part11/getting_started_with_git_hub_actions#getting
 - [ ] Workflow should run on pull requests to 'main'
 - [ ] Workflow should lint, test, and build the package when run
 - [ ] _**Bonus: Test for multiple node versions**_
+- [ ] _**Bonus: Limit Concurrency**_
 ---
 
 ## Stage 4 - Create a PUBLISH workflow
@@ -32,6 +33,7 @@ https://fullstackopen.com/en/part11/getting_started_with_git_hub_actions#getting
 - [ ] Workflow should run on push to the "stage" branch
 - [ ] Workflow should publish to the Github Package Registry when run, with a tag of `next`
 - [ ] Workflow should not publish to npm when run
+---
 
 ## Stage 6 - Create a VERSION workflow
 
@@ -39,6 +41,7 @@ https://fullstackopen.com/en/part11/getting_started_with_git_hub_actions#getting
 - [ ] Workflow should use 'commit-and-tag-version' to bump the version
 - [ ] Workflow should push the version update to the current branch to update the PR
 - [ ] Workflow should not publish to anything when run
+---
 
 ## Stage 7 - Create a CODECOV workflow
 
@@ -46,3 +49,4 @@ https://fullstackopen.com/en/part11/getting_started_with_git_hub_actions#getting
 - [ ] Workflow should run tests and generate coverage reports
 - [ ] Workflow should publish reports to a separate repo
 - [ ] Reports should be put in a subdirectory matching the reporting repo's name, creating if none exists
+---

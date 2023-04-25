@@ -17,7 +17,7 @@
     "test": "vitest run --coverage && vitest typecheck --run",
     "build": "tsup",
     "version": "npx commit-and-tag-version",
-    "postversion": "git commit -am \"chore: publish\" && git push",
+    "postversion": "git commit -am --no-verify \"chore: bump version\"",
     "ci": "npm ci && npm run test && npm run build",
     "release": "npm run build && npm publish --access=public",
     "clean": "rm -rf dist && rm -rf coverage && rm -rf node_modules"
