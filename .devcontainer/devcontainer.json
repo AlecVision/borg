@@ -4,7 +4,7 @@
 	"name": "Node.js & TypeScript",
 	// Or use a Dockerfile or Docker Compose file. More info: https://containers.dev/guide/dockerfile
 	"image": "mcr.microsoft.com/devcontainers/typescript-node:0-16",
-	"postCreateCommand": "ln /workspaces/borg/.githooks/post-commit /workspaces/borg/.git/hooks/post-commit && npm install",
+	"postCreateCommand": "npm install",
 	"customizations": {
 		"codespaces": {
 			"openFiles": [
