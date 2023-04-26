@@ -1,4 +1,13 @@
-# @alecvision/borg
+# Changelog
+
+All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
+
+## [0.4.11](https://github.com/alecvision/borg/compare/v0.4.10...v0.4.11) (2023-04-26)
+
+
+### Bug Fixes
+
+* correct bonstype inference for objects ([7eb445f](https://github.com/alecvision/borg/commit/7eb445fc61e60b15500b6fae16383cc736872442))
 
 ## 0.4.10
 
