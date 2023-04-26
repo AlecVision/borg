@@ -17,4 +17,5 @@ jobs:
         with:
           fetch-depth: 0
       - run: npm run version
-        env: ${{ secrets.GITHUB_TOKEN }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
