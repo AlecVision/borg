@@ -1,8 +1,6 @@
 import type { BorgError } from "src/errors";
 import type { Meta } from "./types/Meta";
 
-// TODO: TESTING FOR WORKFLOW
-
 /////////////////////////////////////////////////////////////////////////////////////////////
 ///                                                                                       ///
 ///  BBBBBBBBBBBBBBBBB        OOOOOOOOOOOO     RRRRRRRRRRRRRRRRR        GGGGGGGGGGG       ///
