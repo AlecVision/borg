@@ -1,0 +1,20 @@
+name: version-package
+
+on:
+  pull_request:
+    branches:
+      - stage
+    types: [ready_for_review]
+
+jobs:
+  version:
+    runs-on: ubuntu-latest
+    permissions: 
+      contents: write
+      pull-requests: write
+    steps:
+      - name: checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - run: npm run version
