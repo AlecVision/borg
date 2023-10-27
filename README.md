@@ -64,6 +64,12 @@ const userSchema = b.object({
 });
 ```
 
+> [!NOTE]
+> Look familiar? The API of the 'JavaScript' layer is heavily inspired by [Zod](https://github.com/colinhacks/zod).†<br />
+> Where `borg` really shines is the TypeScript layer!
+> 
+> † The implementation is also inspired by, but differs significantly from, that of `Zod`.
+
 ### Type Inference
 
 You can use Borg to infer types from your schema, or to infer the type of the object after conversion to BSON:
@@ -85,7 +91,7 @@ type UserBson = b.bsonType<typeof userSchema>; // { id: ObjectId, name: string; 
 
 ### **Parsing**
 
-Parsing produces a new reference, which is strongly typed:
+Parsing produces a new reference, which now has additional type guarantees:
 
 ```ts
 const user = {
@@ -150,7 +156,7 @@ const result = userSchema.try(user);
 if (!result.ok) console.log("Validation failed with errors:", result.error);
 ```
 
-Or, you can use an error boundary and an `instanceof` check to handle errors:
+Or, you can use a try-catch block and an `instanceof` check to handle errors:
 
 ```ts
 try {
@@ -168,7 +174,7 @@ try {
 
 ### **`.parse()`**
 
-Parses the input and returns a new reference that is strongly typed. Throws `BorgError` if validation fails.
+Parses the input and returns a new reference with additional type guarantees. Throws `BorgError` if validation fails.
 
 ### **`.try()`**
 
